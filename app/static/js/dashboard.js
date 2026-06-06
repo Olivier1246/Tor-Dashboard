@@ -1,6 +1,6 @@
 "use strict";
-// Tableau de bord : interrogation périodique de /api/metrics, calcul des
-// débits à partir des compteurs cumulés, et rendu de sparklines en canvas.
+// Dashboard: periodic polling of /api/metrics, rate computation from the
+// cumulative counters, and canvas sparkline rendering.
 
 const POLL_MS = 3000;
 const HISTORY = 40;
@@ -62,7 +62,7 @@ function drawSpark(canvasId, data, color) {
   ctx.lineWidth = 2;
   ctx.lineJoin = "round";
   ctx.stroke();
-  // remplissage doux
+  // soft fill
   ctx.lineTo((data.length - 1) * step, h);
   ctx.lineTo(0, h);
   ctx.closePath();
@@ -127,7 +127,7 @@ async function tick() {
   if (!m.online) { setOnline(false); return; }
   setOnline(true);
 
-  // Débits depuis les deltas de compteurs cumulés
+  // Rates from the deltas of the cumulative counters
   const now = Date.now() / 1000;
   if (prev) {
     const dt = Math.max(now - prev.t, 0.5);

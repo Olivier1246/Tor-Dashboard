@@ -1,7 +1,7 @@
-"""Codes pays ISO 3166-1 alpha-2 → nom (FR) + drapeau emoji.
+"""ISO 3166-1 alpha-2 country codes -> name (FR) + flag emoji.
 
-Le drapeau est dérivé du code par les « regional indicator symbols », sans
-aucune dépendance ni fichier de données.
+The flag is derived from the code using the regional indicator symbols, with
+no dependency or data file. The names are kept in French (UI language).
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ COUNTRY_NAMES: dict[str, str] = {
 
 
 def flag_emoji(code: str) -> str:
-    """Drapeau emoji depuis un code à 2 lettres ('FR' → 🇫🇷)."""
+    """Flag emoji from a 2-letter code ('FR' -> 🇫🇷)."""
     code = (code or "").upper()
     if len(code) != 2 or not code.isalpha():
         return "🏳️"

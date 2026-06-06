@@ -1,10 +1,9 @@
-"""Contrôle du service Tor et écriture du torrc via un helper privilégié.
+"""Control the Tor service and write the torrc through a privileged helper.
 
-Le dashboard tourne en utilisateur non privilégié (ex. ``tordash``). Toutes
-les opérations sensibles passent par un unique binaire racine
-(``tor-dashboard-helper``) autorisé sans mot de passe dans sudoers. Cela
-garde la surface d'attaque minimale : aucune commande arbitraire n'est
-exécutée en root.
+The dashboard runs as an unprivileged user (e.g. ``tordash``). All sensitive
+operations go through a single root binary (``tor-dashboard-helper``) allowed
+without a password in sudoers. This keeps the attack surface minimal: no
+arbitrary command is ever executed as root.
 """
 
 from __future__ import annotations
@@ -17,7 +16,7 @@ _VALID_ACTIONS = {"start", "stop", "restart", "reload", "status"}
 
 
 class HelperError(RuntimeError):
-    """Erreur renvoyée par le helper privilégié."""
+    """Error returned by the privileged helper."""
 
 
 def _run(args: list[str], input_data: str | None = None) -> str:
@@ -35,24 +34,24 @@ def _run(args: list[str], input_data: str | None = None) -> str:
 
 
 def service_action(action: str) -> str:
-    """Exécute start/stop/restart/reload sur l'unité systemd de Tor."""
+    """Run start/stop/restart/reload on Tor's systemd unit."""
     if action not in _VALID_ACTIONS:
         raise ValueError(f"action invalide : {action}")
     return _run([action])
 
 
 def service_status() -> str:
-    """Renvoie l'état systemd brut : active / inactive / failed / ..."""
+    """Return the raw systemd state: active / inactive / failed / ..."""
     try:
         return _run(["status"]) or "unknown"
     except HelperError as exc:
-        # ``systemctl is-active`` renvoie un code != 0 quand inactif
+        # ``systemctl is-active`` returns a non-zero code when inactive
         text = str(exc).strip().lower()
         return text or "inactive"
 
 
 def save_torrc(content: str) -> None:
-    """Valide puis installe un nouveau torrc (via ``tor --verify-config``)."""
-    # Normalise les fins de ligne en \n
+    """Validate then install a new torrc (via ``tor --verify-config``)."""
+    # Normalize line endings to \n
     normalized = content.replace("\r\n", "\n").replace("\r", "\n")
     _run(["savetorrc"], input_data=normalized)

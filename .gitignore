@@ -1,4 +1,4 @@
-# Secrets & état local
+# Secrets & local state
 .env
 users.json
 *.db
@@ -12,6 +12,6 @@ __pycache__/
 venv/
 *.egg-info/
 
-# Divers
+# Misc
 .DS_Store
 *.log

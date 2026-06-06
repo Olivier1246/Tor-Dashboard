@@ -1,6 +1,6 @@
 "use strict";
-// Page Historique : charge /api/history pour la fenêtre sélectionnée et trace
-// trois graphiques (bande passante, circuits, connexions).
+// History page: loads /api/history for the selected window and draws three
+// charts (bandwidth, circuits, connections).
 
 const RANGE_SEC = { "1h": 3600, "6h": 21600, "24h": 86400, "7d": 604800 };
 let currentRange = "24h";

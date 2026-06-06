@@ -6,124 +6,125 @@
 ![Platform](https://img.shields.io/badge/Platform-Debian%20%7C%20Ubuntu-A81D33.svg)
 ![Access](https://img.shields.io/badge/Access-Tor%20onion%20%2B%202FA-7D4698.svg)
 
-Tableau de bord web pour piloter un **relais Tor personnel** hébergé sur une VM
-Debian/Ubuntu. Il affiche les métriques du relais, permet de modifier sa
-configuration (`torrc`), et de le démarrer / arrêter / redémarrer — le tout
-derrière une authentification forte et accessible **hors LAN via un service
-onion** (aucun port ouvert sur Internet).
+Web dashboard to manage a **personal Tor relay** hosted on a Debian/Ubuntu VM.
+It displays the relay metrics, lets you edit its configuration (`torrc`), and
+start / stop / restart it — all behind strong authentication and reachable
+**outside the LAN through an onion service** (no port open on the Internet).
 
-## Fonctionnalités
+> The user interface is in French; the code, comments and documentation are in
+> English.
 
-- **Métriques temps réel** : débits montant/descendant (sparklines), trafic
-  cumulé, temps de fonctionnement, % de bootstrap, circuits & connexions,
-  drapeaux du consensus (Guard/Fast/Stable/Exit…), politique de sortie,
-  comptabilité de bande passante (`AccountingMax`), identité (surnom,
-  empreinte, version), adresse `.onion` du dashboard.
-- **Historique persistant** : échantillonnage en arrière-plan (SQLite) des
-  débits, circuits et connexions, avec graphiques sur 1 h / 6 h / 24 h / 7 j
-  (rétention configurable). Survit aux redémarrages du dashboard.
-- **Connexions par pays** : répartition géographique des pairs relais, résolue
-  via le ControlPort (`orconn-status` → consensus → base GeoIP de Tor), sans
-  aucun accès aux sockets système.
-- **Édition de configuration** : éditeur `torrc` avec **validation
-  `tor --verify-config` avant écriture** (un fichier invalide est rejeté sans
-  rien écraser) + vue des directives clés.
-- **Contrôle du service** : démarrer / arrêter / redémarrer / recharger via
-  `systemctl`, état systemd en direct.
-- **Sécurité** : login + mot de passe (bcrypt) + **2FA TOTP**, sessions
-  signées, exposition via **onion service v3**, privilèges élevés confinés à un
-  unique helper root (sudoers restreint).
-- **Démarrage automatique** au boot de la VM, **après** le relais Tor
+## Features
+
+- **Real-time metrics**: upload/download rates (sparklines), cumulative
+  traffic, uptime, bootstrap %, circuits & connections, consensus flags
+  (Guard/Fast/Stable/Exit…), exit policy, bandwidth accounting
+  (`AccountingMax`), identity (nickname, fingerprint, version), the dashboard
+  `.onion` address.
+- **Persistent history**: background sampling (SQLite) of rates, circuits and
+  connections, with charts over 1h / 6h / 24h / 7d (configurable retention).
+  Survives dashboard restarts.
+- **Connections by country**: geographic breakdown of relay peers, resolved
+  through the ControlPort (`orconn-status` → consensus → Tor's GeoIP database),
+  with no access to system sockets.
+- **Configuration editing**: `torrc` editor with **`tor --verify-config`
+  validation before writing** (an invalid file is rejected without overwriting
+  anything) plus a view of the key directives.
+- **Service control**: start / stop / restart / reload via `systemctl`, with
+  live systemd status.
+- **Security**: username + password (bcrypt) + **TOTP 2FA**, signed sessions,
+  exposure through an **onion service v3**, elevated privileges confined to a
+  single root helper (restricted sudoers).
+- **Automatic start** on VM boot, **after** the Tor relay
   (`After=`/`Requires=tor.service`).
 
 ## Architecture
 
 ```
-Navigateur (Tor Browser)
+Browser (Tor Browser)
         │  http://xxxxxxxx.onion
         ▼
-   Démon Tor  ──HiddenServicePort──►  127.0.0.1:8080  (uvicorn / FastAPI)
+   Tor daemon  ──HiddenServicePort──►  127.0.0.1:8080  (uvicorn / FastAPI)
         ▲                                   │
-        │ ControlPort 9051 (métriques)      │ sudo  ┌───────────────────────┐
+        │ ControlPort 9051 (metrics)        │ sudo  ┌───────────────────────┐
         └───────────────────────────────────┴──────►│ tor-dashboard-helper  │
                                                      │ start/stop/.../torrc  │ (root)
                                                      └───────────────────────┘
 ```
 
-| Composant | Rôle |
+| Component | Role |
 |-----------|------|
-| `app/tor_controller.py` | Lecture des métriques + connexions par pays (stem) |
-| `app/history.py`        | Historique persistant (SQLite) + échantillonnage |
-| `app/countries.py`      | Codes pays ISO → nom FR + drapeau emoji |
-| `app/system_control.py` | Appels au helper privilégié (sudo) |
-| `app/torrc_manager.py`  | Lecture/parsing du `torrc` |
-| `app/auth.py`           | Mot de passe bcrypt + TOTP + sessions |
-| `app/main.py`           | Routes FastAPI + pages + tâche d'échantillonnage |
-| `deploy/`               | Helper, unité systemd, sudoers, exemple torrc |
-| `scripts/`              | `install.sh`, `manage.py` (comptes) |
+| `app/tor_controller.py` | Read metrics + connections by country (stem) |
+| `app/history.py`        | Persistent history (SQLite) + sampling |
+| `app/countries.py`      | ISO country codes → FR name + flag emoji |
+| `app/system_control.py` | Calls to the privileged helper (sudo) |
+| `app/torrc_manager.py`  | Read/parse the `torrc` |
+| `app/auth.py`           | bcrypt password + TOTP + sessions |
+| `app/main.py`           | FastAPI routes + pages + sampling task |
+| `deploy/`               | Helper, systemd unit, sudoers, torrc example |
+| `scripts/`              | `install.sh`, `manage.py` (accounts) |
 
-## Installation (sur la VM)
+## Installation (on the VM)
 
 ```bash
 git clone <repo> tor-dashboard && cd tor-dashboard
 sudo ./scripts/install.sh
 ```
 
-Puis suivez les 4 étapes affichées en fin d'installation :
+Then follow the 4 steps printed at the end of the installation:
 
-1. **Activer ControlPort + onion service** — ajoutez `deploy/torrc.example`
-   à `/etc/tor/torrc` (en adaptant les directives de relais), puis
+1. **Enable ControlPort + onion service** — append `deploy/torrc.example` to
+   `/etc/tor/torrc` (adapting the relay directives), then
    `sudo systemctl restart tor@default`.
-2. **Créer un compte** :
+2. **Create an account**:
    ```bash
    sudo -u tordash /opt/tor-dashboard/.venv/bin/python \
         /opt/tor-dashboard/scripts/manage.py useradd admin
    ```
-   Scannez le QR code TOTP affiché (Aegis, Google Authenticator…).
-3. **Démarrer** : `sudo systemctl start tor-dashboard`.
-4. **Récupérer l'adresse onion** :
-   `sudo cat /var/lib/tor/dashboard/hostname` → à ouvrir dans Tor Browser.
+   Scan the printed TOTP QR code (Aegis, Google Authenticator…).
+3. **Start**: `sudo systemctl start tor-dashboard`.
+4. **Get the onion address**:
+   `sudo cat /var/lib/tor/dashboard/hostname` → open it in Tor Browser.
 
-## Développement local (Windows/Linux)
+## Local development (Windows/Linux)
 
-> Le contrôle réel d'un relais nécessite la VM. En local, on peut lancer
-> l'interface ; les métriques resteront « hors ligne » sans ControlPort
-> accessible.
+> Actually controlling a relay requires the VM. Locally you can launch the
+> interface; the metrics will stay "offline" without a reachable ControlPort.
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate          # PowerShell : .venv\Scripts\Activate.ps1
+.venv\Scripts\activate          # PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env          # éditez SECRET_KEY
+copy .env.example .env          # edit SECRET_KEY
 python scripts\manage.py useradd admin
 uvicorn app.main:app --reload --port 8080
 ```
 
-Ouvrez http://127.0.0.1:8080/.
+Open http://127.0.0.1:8080/.
 
-## Sécurité — notes
+## Security notes
 
-- Le dashboard n'écoute qu'en `127.0.0.1`. L'accès distant passe
-  **exclusivement** par l'onion service : rien n'est exposé sur l'IP publique.
-- Les actions privilégiées (systemctl, écriture du torrc) ne sont **jamais**
-  exécutées directement par le service web : elles transitent par
-  `tor-dashboard-helper`, seul binaire autorisé dans sudoers, à sous-commandes
-  fixes.
-- `.env` et `users.json` (hash + secret TOTP) sont en mode `600`,
-  propriété de `tordash`, et exclus de Git.
-- Pensez à conserver précieusement le secret TOTP affiché à la création du
-  compte (impossible à récupérer ensuite ; recréez le compte si perdu).
+- The dashboard only listens on `127.0.0.1`. Remote access goes
+  **exclusively** through the onion service: nothing is exposed on the public
+  IP.
+- Privileged actions (systemctl, writing the torrc) are **never** executed
+  directly by the web service: they go through `tor-dashboard-helper`, the only
+  binary allowed in sudoers, with fixed sub-commands.
+- `.env` and `users.json` (hash + TOTP secret) are mode `600`, owned by
+  `tordash`, and excluded from Git.
+- Keep the TOTP secret shown at account creation safe (it cannot be recovered
+  afterwards; recreate the account if lost).
 
-## Gestion des comptes
+## Account management
 
 ```bash
-manage.py useradd <nom>   # crée un compte + secret TOTP (QR)
-manage.py passwd  <nom>   # change le mot de passe
-manage.py list            # liste les comptes
-manage.py delete  <nom>   # supprime un compte
+manage.py useradd <name>   # create an account + TOTP secret (QR)
+manage.py passwd  <name>   # change the password
+manage.py list             # list accounts
+manage.py delete  <name>   # delete an account
 ```
 
-## Licence
+## License
 
-Distribué sous licence **MIT** — voir [LICENSE](LICENSE). Fourni tel quel, sans
-garantie. Vous êtes libre de l'utiliser, le modifier et le redistribuer.
+Distributed under the **MIT** license — see [LICENSE](LICENSE). Provided as is,
+without warranty. You are free to use, modify and redistribute it.

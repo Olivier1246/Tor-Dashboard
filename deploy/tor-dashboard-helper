@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# tor-dashboard-helper — unique point d'élévation de privilèges du dashboard.
+# tor-dashboard-helper -- the dashboard's single privilege-escalation point.
 #
-# Installé en root dans /usr/local/bin et autorisé via sudoers SANS mot de
-# passe pour l'utilisateur du dashboard. Il n'expose QUE des sous-commandes
-# fixes : aucune commande arbitraire ne peut être exécutée en root.
+# Installed as root in /usr/local/bin and allowed via sudoers WITHOUT a
+# password for the dashboard user. It exposes ONLY fixed sub-commands: no
+# arbitrary command can ever be executed as root.
 #
 #   tor-dashboard-helper start|stop|restart|reload|status
-#   tor-dashboard-helper savetorrc      (lit le nouveau torrc sur stdin)
+#   tor-dashboard-helper savetorrc      (reads the new torrc from stdin)
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-# Réglages surchargés par /etc/tor-dashboard/helper.conf si présent.
+# Settings overridden by /etc/tor-dashboard/helper.conf if present.
 SERVICE="tor@default"
 TORRC="/etc/tor/torrc"
-TOR_USER="debian-tor"          # utilisateur réel du démon Tor
+TOR_USER="debian-tor"          # actual user of the Tor daemon
 CONF="/etc/tor-dashboard/helper.conf"
 [ -r "$CONF" ] && . "$CONF"
 
@@ -32,11 +32,11 @@ case "${1:-}" in
   savetorrc)
     tmp="$(mktemp /tmp/torrc.XXXXXX)"
     trap 'rm -f "$tmp"' EXIT
-    cat > "$tmp"                              # nouveau torrc depuis stdin
-    chmod 0644 "$tmp"                         # lisible par l'utilisateur Tor
-    # Valider EN TANT QU'UTILISATEUR TOR : sinon Tor croit tourner sous le
-    # mauvais user et refuse à tort le HiddenServiceDir (appartenant à
-    # debian-tor), produisant un faux « Failed to configure rendezvous options ».
+    cat > "$tmp"                              # new torrc from stdin
+    chmod 0644 "$tmp"                         # readable by the Tor user
+    # Validate AS THE TOR USER: otherwise Tor thinks it runs as the wrong user
+    # and wrongly rejects the HiddenServiceDir (owned by debian-tor), producing
+    # a spurious "Failed to configure rendezvous options".
     if command -v runuser >/dev/null 2>&1; then
       verify() { runuser -u "$TOR_USER" -- tor --verify-config -f "$tmp"; }
     else

@@ -1,14 +1,14 @@
-"""Lecture du torrc et extraction de quelques réglages courants.
+"""Read the torrc and extract a few common settings.
 
-L'écriture passe par :func:`app.system_control.save_torrc` (helper privilégié
-qui valide la configuration avant de l'installer).
+Writing goes through :func:`app.system_control.save_torrc` (privileged helper
+that validates the configuration before installing it).
 """
 
 from __future__ import annotations
 
 from .config import settings
 
-# Directives présentées comme champs « rapides » dans l'UI.
+# Directives presented as "quick" fields in the UI.
 QUICK_KEYS = [
     ("Nickname", "Nom du relais"),
     ("ContactInfo", "Contact (email)"),
@@ -22,7 +22,7 @@ QUICK_KEYS = [
 
 
 def read_torrc() -> str:
-    """Renvoie le contenu brut du torrc (chaîne vide si absent)."""
+    """Return the raw torrc content (empty string if absent)."""
     try:
         with open(settings.torrc_path, "r", encoding="utf-8") as fh:
             return fh.read()
@@ -33,7 +33,7 @@ def read_torrc() -> str:
 
 
 def parse_quick_values(content: str) -> dict[str, str]:
-    """Extrait la dernière valeur de chaque directive « rapide »."""
+    """Extract the last value of each "quick" directive."""
     keys = {k.lower(): k for k, _ in QUICK_KEYS}
     values: dict[str, str] = {}
     for raw in content.splitlines():

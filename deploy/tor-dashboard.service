@@ -1,6 +1,6 @@
-# Unité systemd du dashboard.
-# Démarre APRÈS le relais Tor (After=/Requires=tor.service) afin que le
-# ControlPort soit disponible dès le lancement.  → /etc/systemd/system/
+# systemd unit for the dashboard.
+# Starts AFTER the Tor relay (After=/Requires=tor.service) so that the
+# ControlPort is available right from launch.  -> /etc/systemd/system/
 
 [Unit]
 Description=Tor Relay Dashboard
@@ -21,12 +21,12 @@ ExecStart=/opt/tor-dashboard/.venv/bin/uvicorn app.main:app \
 Restart=on-failure
 RestartSec=3
 
-# --- Durcissement ----------------------------------------------------------
+# --- Hardening --------------------------------------------------------------
 NoNewPrivileges=false
 ProtectSystem=full
-# /etc est en lecture seule (ProtectSystem=full) ; on rouvre UNIQUEMENT
-# /etc/tor en écriture pour que le helper puisse installer le torrc validé.
-# Le helper hérite du namespace du service même via sudo.
+# /etc is read-only (ProtectSystem=full); we reopen ONLY /etc/tor for writing
+# so the helper can install the validated torrc. The helper inherits the
+# service namespace even through sudo.
 ReadWritePaths=/etc/tor
 ProtectHome=true
 PrivateTmp=false
@@ -36,8 +36,8 @@ ProtectKernelTunables=true
 RestrictSUIDSGID=true
 LockPersonality=true
 MemoryDenyWriteExecute=true
-# NoNewPrivileges reste à false car le dashboard appelle sudo (helper).
-# PrivateTmp à false pour partager /tmp avec le helper lors de savetorrc.
+# NoNewPrivileges stays false because the dashboard calls sudo (helper).
+# PrivateTmp is false to share /tmp with the helper during savetorrc.
 
 [Install]
 WantedBy=multi-user.target

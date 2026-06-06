@@ -1,8 +1,8 @@
-# Autorise l'utilisateur du dashboard à n'exécuter QUE le helper, sans mot de
-# passe. Installer dans /etc/sudoers.d/tor-dashboard (mode 0440) puis vérifier
-# avec :  visudo -cf /etc/sudoers.d/tor-dashboard
+# Allows the dashboard user to run ONLY the helper, without a password.
+# Install into /etc/sudoers.d/tor-dashboard (mode 0440) then check with:
+#   visudo -cf /etc/sudoers.d/tor-dashboard
 #
-# Le helper est root et non modifiable par tordash : la surface est limitée à
-# ses sous-commandes fixes (start/stop/restart/reload/status/savetorrc).
+# The helper is root-owned and not modifiable by tordash: the surface is
+# limited to its fixed sub-commands (start/stop/restart/reload/status/savetorrc).
 
 tordash ALL=(root) NOPASSWD: /usr/local/bin/tor-dashboard-helper

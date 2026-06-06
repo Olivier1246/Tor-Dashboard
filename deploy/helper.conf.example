@@ -1,11 +1,11 @@
-# Configuration du helper privilégié — copier dans /etc/tor-dashboard/helper.conf
-# (root:root, mode 0644). Sourcé par tor-dashboard-helper.
+# Privileged helper configuration -- copy to /etc/tor-dashboard/helper.conf
+# (root:root, mode 0644). Sourced by tor-dashboard-helper.
 
-# Nom de l'unité systemd du relais (Debian : tor@default)
+# Name of the relay's systemd unit (Debian: tor@default)
 SERVICE="tor@default"
 
-# Chemin du torrc piloté par le dashboard
+# Path of the torrc managed by the dashboard
 TORRC="/etc/tor/torrc"
 
-# Utilisateur réel du démon Tor (sert à valider le torrc sous le bon compte)
+# Actual user of the Tor daemon (used to validate the torrc under the right account)
 TOR_USER="debian-tor"

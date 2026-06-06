@@ -1,35 +1,35 @@
 # ===========================================================================
-# Extrait de torrc à fusionner avec votre /etc/tor/torrc
-# Active : (1) le ControlPort pour les métriques, (2) l'onion service du
-# dashboard pour l'accès distant sécurisé.
+# torrc snippet to merge into your /etc/tor/torrc
+# Enables: (1) the ControlPort for metrics, (2) the dashboard onion service
+# for secure remote access.
 # ===========================================================================
 
-## --- 1. ControlPort (lecture des métriques par le dashboard) --------------
-# Le dashboard s'y connecte en local pour lire l'état du relais.
+## --- 1. ControlPort (metrics read by the dashboard) -----------------------
+# The dashboard connects to it locally to read the relay state.
 ControlPort 9051
-# Authentification par cookie : l'utilisateur tordash doit être dans le
-# groupe debian-tor pour lire le fichier de cookie.
+# Cookie authentication: the tordash user must be in the debian-tor group to
+# read the cookie file.
 CookieAuthentication 1
-# CookieAuthFileGroupReadable n'a d'effet QUE si CookieAuthFile est explicite
-# (sinon Tor avertit « will have no effect »). On fixe donc les deux.
+# CookieAuthFileGroupReadable only has effect if CookieAuthFile is explicit
+# (otherwise Tor warns "will have no effect"). So we set both.
 CookieAuthFile /run/tor/control.authcookie
 CookieAuthFileGroupReadable 1
-# (Alternative : HashedControlPassword 16:... et renseigner TOR_CONTROL_PASSWORD)
+# (Alternative: HashedControlPassword 16:... and set TOR_CONTROL_PASSWORD)
 
-## --- 2. Onion service du dashboard ----------------------------------------
-# Rend le dashboard joignable hors LAN via une adresse .onion, sans ouvrir
-# le moindre port sur Internet. Le port 80 du service onion est redirigé
-# vers le dashboard local (127.0.0.1:8080).
+## --- 2. Dashboard onion service -------------------------------------------
+# Makes the dashboard reachable outside the LAN via a .onion address, without
+# opening any port on the Internet. The onion service port 80 is forwarded to
+# the local dashboard (127.0.0.1:8080).
 HiddenServiceDir /var/lib/tor/dashboard/
 HiddenServicePort 80 127.0.0.1:8080
-# Restreint la version du protocole onion (v3, défaut).
+# Pin the onion protocol version (v3, default).
 HiddenServiceVersion 3
 
-## --- 3. Exemple de configuration de relais (adapter à votre cas) ----------
-# Nickname MonRelais
+## --- 3. Example relay configuration (adapt to your case) ------------------
+# Nickname MyRelay
 # ContactInfo admin@example.com
 # ORPort 9001
 # RelayBandwidthRate 10 MBytes
 # RelayBandwidthBurst 20 MBytes
 # ExitRelay 0
-# Après tout changement : page « Contrôle » → Recharger / Redémarrer.
+# After any change: "Control" page -> Reload / Restart.

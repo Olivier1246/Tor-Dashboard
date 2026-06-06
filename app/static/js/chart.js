@@ -1,7 +1,7 @@
 "use strict";
-// Mini moteur de graphique linéaire sur canvas — sans dépendance (compatible
-// onion service hors-ligne). Gère plusieurs séries, axe temporel, grille,
-// libellés d'axe Y formatables, et coupures de courbe sur valeurs nulles.
+// Tiny canvas line-chart engine -- no dependency (works on an offline onion
+// service). Handles multiple series, a time axis, a grid, formattable Y-axis
+// labels, and curve breaks on null values.
 
 const ChartColors = {
   grid: "#36294a",
@@ -39,7 +39,7 @@ function drawLineChart(canvas, opts) {
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
-  // Domaine X (temps) et Y (max sur toutes séries)
+  // X domain (time) and Y domain (max over all series)
   let tMin = Infinity, tMax = -Infinity, vMax = 0;
   for (const s of opts.series) {
     for (const p of s.data) {
@@ -59,7 +59,7 @@ function drawLineChart(canvas, opts) {
   const x = (t) => padL + ((t - tMin) / (tMax - tMin)) * plotW;
   const y = (v) => padT + plotH - (v / vMax) * plotH;
 
-  // Grille + libellés Y
+  // Grid + Y labels
   ctx.font = "11px system-ui";
   ctx.textBaseline = "middle";
   const yTicks = 4;
@@ -77,7 +77,7 @@ function drawLineChart(canvas, opts) {
     ctx.fillText(opts.yFormat ? opts.yFormat(v) : String(Math.round(v)), padL - 8, yy);
   }
 
-  // Libellés X (5 repères)
+  // X labels (5 ticks)
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   const xTicks = 5;
@@ -87,9 +87,9 @@ function drawLineChart(canvas, opts) {
     ctx.fillText(fmtTimeLabel(t, opts.rangeSec), x(t), H - padB + 6);
   }
 
-  // Séries
+  // Series
   for (const s of opts.series) {
-    // Aire douce
+    // Smooth line
     ctx.beginPath();
     let started = false;
     for (const p of s.data) {
@@ -103,7 +103,7 @@ function drawLineChart(canvas, opts) {
     ctx.lineJoin = "round";
     ctx.stroke();
 
-    // Remplissage léger sous la courbe (par segments continus)
+    // Light fill below the curve (per continuous segment)
     ctx.save();
     ctx.globalAlpha = 0.12;
     ctx.beginPath();

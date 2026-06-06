@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Gestion des comptes du dashboard (mot de passe + secret TOTP).
+"""Dashboard account management (password + TOTP secret).
 
-Usage :
-    python scripts/manage.py useradd <identifiant>
-    python scripts/manage.py passwd  <identifiant>
+Usage:
+    python scripts/manage.py useradd <username>
+    python scripts/manage.py passwd  <username>
     python scripts/manage.py list
-    python scripts/manage.py delete  <identifiant>
+    python scripts/manage.py delete  <username>
 
-Le secret TOTP est généré aléatoirement et affiché sous forme d'URI
-otpauth:// + QR code ASCII à scanner avec Google Authenticator / Aegis / etc.
+The TOTP secret is generated randomly and printed as an otpauth:// URI plus
+an ASCII QR code to scan with Google Authenticator / Aegis / etc.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import json
 import sys
 from pathlib import Path
 
-# Permet d'importer le package app/ depuis la racine du projet
+# Allow importing the app/ package from the project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pyotp  # noqa: E402

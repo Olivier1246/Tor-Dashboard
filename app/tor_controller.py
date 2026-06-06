@@ -1,9 +1,9 @@
-"""Interface avec le démon Tor via le ControlPort (bibliothèque stem).
+"""Interface to the Tor daemon through the ControlPort (stem library).
 
-Cette couche est volontairement défensive : chaque information est récupérée
-dans son propre try/except afin qu'une métrique indisponible n'empêche pas
-les autres de s'afficher. Si Tor est arrêté, get_metrics() renvoie
-simplement ``{"online": False}``.
+This layer is deliberately defensive: every piece of information is fetched in
+its own try/except so that an unavailable metric does not prevent the others
+from being displayed. If Tor is stopped, get_metrics() simply returns
+``{"online": False}``.
 """
 
 from __future__ import annotations
@@ -21,16 +21,16 @@ from .countries import country_name, flag_emoji
 
 
 class TorController:
-    """Connexion paresseuse et thread-safe au ControlPort de Tor."""
+    """Lazy, thread-safe connection to Tor's ControlPort."""
 
     def __init__(self) -> None:
         self._controller: Controller | None = None
         self._lock = threading.Lock()
-        # Cache fingerprint → adresse IP du consensus (évite N allers-retours)
+        # Cache fingerprint -> consensus IP address (avoids N round-trips)
         self._consensus: dict[str, str] = {}
         self._consensus_ts = 0.0
 
-    # -- gestion de connexion ------------------------------------------------
+    # -- connection management ----------------------------------------------
     def _connect(self) -> Controller:
         controller = Controller.from_port(port=settings.tor_control_port)
         if settings.tor_control_password:
@@ -40,7 +40,7 @@ class TorController:
         return controller
 
     def _get(self) -> Controller:
-        """Renvoie un contrôleur authentifié, en se reconnectant si besoin."""
+        """Return an authenticated controller, reconnecting if needed."""
         if self._controller is not None and self._controller.is_alive():
             return self._controller
         if self._controller is not None:
@@ -68,9 +68,9 @@ class TorController:
         except Exception:
             return default
 
-    # -- métriques -----------------------------------------------------------
+    # -- metrics -------------------------------------------------------------
     def get_metrics(self) -> dict[str, Any]:
-        """Collecte un instantané des métriques du relais."""
+        """Collect a snapshot of the relay metrics."""
         with self._lock:
             try:
                 c = self._get()
@@ -79,21 +79,21 @@ class TorController:
 
             m: dict[str, Any] = {"online": True}
 
-            # Identité
+            # Identity
             m["nickname"] = self._safe(lambda: c.get_conf("Nickname", "Unnamed"))
             m["fingerprint"] = self._safe(lambda: c.get_info("fingerprint"))
             ver = self._safe(lambda: str(c.get_version()))
             m["version"] = ver
 
-            # Bootstrap (% de démarrage)
+            # Bootstrap (startup percentage)
             boot = self._safe(lambda: c.get_info("status/bootstrap-phase"), "")
             m["bootstrap"] = self._parse_bootstrap(boot)
 
-            # Uptime (secondes) — dispo sur Tor récents
+            # Uptime (seconds) -- available on recent Tor versions
             up = self._safe(lambda: c.get_info("uptime"))
             m["uptime"] = int(up) if up and up.isdigit() else None
 
-            # Trafic cumulé depuis le démarrage (octets)
+            # Cumulative traffic since startup (bytes)
             m["read_total"] = self._safe(
                 lambda: int(c.get_info("traffic/read")), 0
             )
@@ -101,11 +101,11 @@ class TorController:
                 lambda: int(c.get_info("traffic/written")), 0
             )
 
-            # Bande passante configurée (octets/s)
+            # Configured bandwidth (bytes/s)
             m["rate"] = self._safe(lambda: c.get_effective_rate())
             m["burst"] = self._safe(lambda: c.get_effective_rate(burst=True))
 
-            # Drapeaux du consensus (Guard, Fast, Stable, Exit, Running…)
+            # Consensus flags (Guard, Fast, Stable, Exit, Running, ...)
             fp = m.get("fingerprint")
             flags = None
             if fp:
@@ -114,15 +114,15 @@ class TorController:
                 )
             m["flags"] = flags or []
 
-            # Politique de sortie (résumé)
+            # Exit policy (summary)
             m["exit_policy"] = self._safe(
                 lambda: str(c.get_exit_policy()), ""
             )
 
-            # Circuits & connexions OR ouvertes
-            # (orconn-status passe par le ControlPort : fiable quel que soit
-            #  l'utilisateur, contrairement à get_connections() qui doit lire
-            #  les sockets du process Tor via /proc.)
+            # Circuits & open OR connections
+            # (orconn-status goes through the ControlPort: reliable whatever the
+            #  user, unlike get_connections() which must read the Tor process
+            #  sockets via /proc.)
             m["circuits"] = self._safe(lambda: len(c.get_circuits()), 0)
             oc = self._safe(lambda: c.get_info("orconn-status"))
             m["connections"] = (
@@ -130,10 +130,10 @@ class TorController:
                 if oc else None
             )
 
-            # Comptabilité de bande passante (AccountingMax)
+            # Bandwidth accounting (AccountingMax)
             m["accounting"] = self._get_accounting(c)
 
-            # Adresse onion du dashboard
+            # Dashboard onion address
             m["onion"] = self._read_onion_address()
 
             return m
@@ -177,9 +177,9 @@ class TorController:
         except Exception:
             return None
 
-    # -- connexions par pays -------------------------------------------------
+    # -- connections by country ----------------------------------------------
     def _consensus_map(self, c: Controller) -> dict[str, str]:
-        """Carte fingerprint → adresse IP du consensus, mise en cache 5 min."""
+        """Map fingerprint -> consensus IP address, cached for 5 minutes."""
         now = time.time()
         if self._consensus and now - self._consensus_ts < 300:
             return self._consensus
@@ -189,14 +189,14 @@ class TorController:
                 if desc.fingerprint and desc.address:
                     mapping[desc.fingerprint] = desc.address
         except Exception:
-            return self._consensus  # garde l'ancien cache si échec
+            return self._consensus  # keep the old cache on failure
         self._consensus = mapping
         self._consensus_ts = now
         return mapping
 
     @staticmethod
     def _parse_orconn_fingerprints(orconn: str) -> list[str]:
-        """Extrait les empreintes des connexions OR (lignes ``$FP~nick STATE``)."""
+        """Extract fingerprints from OR connections (lines ``$FP~nick STATE``)."""
         fps: list[str] = []
         for line in orconn.splitlines():
             line = line.strip()
@@ -205,7 +205,7 @@ class TorController:
             target = line.split()[0]
             if target.startswith("$"):
                 target = target[1:]
-            # Sépare l'empreinte d'un éventuel ~nick ou =nick
+            # Split the fingerprint from any trailing ~nick or =nick
             for sep in ("~", "="):
                 if sep in target:
                     target = target.split(sep, 1)[0]
@@ -213,11 +213,11 @@ class TorController:
         return fps
 
     def connections_by_country(self, max_relays: int = 1500) -> dict[str, Any]:
-        """Agrège les connexions OR du relais par pays (via le ControlPort).
+        """Aggregate the relay's OR connections by country (via the ControlPort).
 
-        Ne nécessite aucun accès aux sockets système : on liste les pairs via
-        ``orconn-status``, on résout leur IP dans le consensus, puis le pays
-        via ``GETINFO ip-to-country`` (base GeoIP de Tor).
+        Requires no access to system sockets: peers are listed via
+        ``orconn-status``, their IP is resolved from the consensus, then the
+        country via ``GETINFO ip-to-country`` (Tor's GeoIP database).
         """
         with self._lock:
             try:
@@ -268,13 +268,13 @@ class TorController:
                 "countries": countries,
             }
 
-    # -- signaux -------------------------------------------------------------
+    # -- signals -------------------------------------------------------------
     def signal(self, sig: str) -> None:
-        """Envoie un signal Tor (RELOAD, NEWNYM, …) via le ControlPort."""
+        """Send a Tor signal (RELOAD, NEWNYM, ...) through the ControlPort."""
         with self._lock:
             c = self._get()
             c.signal(getattr(stem.Signal, sig))
 
 
-# Instance partagée
+# Shared instance
 tor = TorController()

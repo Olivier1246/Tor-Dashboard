@@ -1,4 +1,4 @@
-"""Chargement de la configuration depuis l'environnement / .env."""
+"""Load configuration from the environment / .env file."""
 
 from __future__ import annotations
 
@@ -16,32 +16,32 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Sécurité / sessions
+    # Security / sessions
     secret_key: str = "change-me"
     cookie_secure: bool = False
     session_max_age: int = 3600
 
-    # Serveur web
+    # Web server
     host: str = "127.0.0.1"
     port: int = 8080
 
-    # ControlPort Tor
+    # Tor ControlPort
     tor_control_port: int = 9051
     tor_control_password: str = ""
 
-    # Contrôle système
+    # System control
     tor_service: str = "tor@default"
     torrc_path: str = "/etc/tor/torrc"
     helper_path: str = "/usr/local/bin/tor-dashboard-helper"
     onion_hostname_file: str = "/var/lib/tor/dashboard/hostname"
 
-    # Utilisateurs
+    # Users
     users_file: str = "users.json"
 
-    # Historique persistant
+    # Persistent history
     history_db: str = "history.db"
-    sample_interval: int = 60          # secondes entre deux échantillons
-    history_retention_days: int = 7    # purge au-delà
+    sample_interval: int = 60          # seconds between two samples
+    history_retention_days: int = 7    # prune beyond this
 
     @property
     def users_path(self) -> Path:

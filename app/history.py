@@ -1,9 +1,9 @@
-"""Historique persistant des métriques (SQLite).
+"""Persistent metrics history (SQLite).
 
-On enregistre périodiquement les compteurs cumulés de trafic ; les débits
-sont recalculés à la lecture à partir des deltas entre échantillons. Stocker
-les compteurs bruts (plutôt que les débits) permet de rester juste même en
-cas de redémarrage de Tor (remise à zéro des compteurs → on coupe la courbe).
+Cumulative traffic counters are recorded periodically; rates are recomputed at
+read time from the deltas between samples. Storing the raw counters (rather
+than the rates) keeps things correct even when Tor restarts (the counters
+reset -> we break the curve).
 """
 
 from __future__ import annotations
@@ -40,9 +40,9 @@ class History:
                 )"""
             )
 
-    # -- écriture ------------------------------------------------------------
+    # -- writing -------------------------------------------------------------
     def add(self, m: dict[str, Any]) -> None:
-        """Enregistre un échantillon si le relais est en ligne."""
+        """Record a sample if the relay is online."""
         if not m.get("online"):
             return
         if m.get("read_total") is None or m.get("written_total") is None:
@@ -65,12 +65,12 @@ class History:
         with self._lock, self._conn() as c:
             c.execute("DELETE FROM samples WHERE ts < ?", (cutoff,))
 
-    # -- lecture -------------------------------------------------------------
+    # -- reading -------------------------------------------------------------
     def series(self, seconds: int, max_points: int = 400) -> list[dict[str, Any]]:
-        """Renvoie les débits (octets/s) sur la fenêtre demandée.
+        """Return the rates (bytes/s) over the requested window.
 
-        ``down``/``up`` valent ``None`` quand un delta est négatif (compteur
-        remis à zéro par un redémarrage de Tor) : la courbe est alors coupée.
+        ``down``/``up`` are ``None`` when a delta is negative (counter reset by
+        a Tor restart): the curve is then broken at that point.
         """
         cutoff = int(time.time()) - seconds
         with self._conn() as c:
@@ -125,5 +125,5 @@ def _avg(values) -> float | None:
     return sum(nums) / len(nums) if nums else None
 
 
-# Instance partagée
+# Shared instance
 history = History(settings.history_path)

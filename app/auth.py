@@ -1,6 +1,6 @@
-"""Authentification : mot de passe (bcrypt) + double facteur TOTP.
+"""Authentication: password (bcrypt) + TOTP second factor.
 
-Les comptes sont stockés dans un fichier JSON (``users_file``) :
+Accounts are stored in a JSON file (``users_file``):
 
     {
       "admin": {
@@ -36,11 +36,11 @@ def hash_password(password: str) -> str:
 
 
 def verify_credentials(username: str, password: str, totp_code: str) -> bool:
-    """Vérifie identifiant + mot de passe + code TOTP (les trois)."""
+    """Verify username + password + TOTP code (all three)."""
     users = _load_users()
     user = users.get(username)
     if not user:
-        # Comparaison factice pour limiter l'oracle temporel
+        # Dummy comparison to limit the timing oracle
         bcrypt.checkpw(b"x", bcrypt.gensalt())
         return False
 
@@ -59,10 +59,10 @@ def current_user(request: Request) -> str | None:
 
 
 def require_auth(request: Request):
-    """Dépendance FastAPI : redirige vers /login si non authentifié.
+    """FastAPI dependency: redirect to /login if not authenticated.
 
-    Lève une RedirectResponse via exception gérée dans main (voir
-    ``redirect_unauthenticated``). On renvoie ici l'utilisateur si connecté.
+    Raises NotAuthenticated, handled in main (see the exception handler).
+    Returns the user when a valid session exists.
     """
     user = current_user(request)
     if not user:
@@ -71,7 +71,7 @@ def require_auth(request: Request):
 
 
 class NotAuthenticated(Exception):
-    """Levée quand une route protégée est atteinte sans session valide."""
+    """Raised when a protected route is reached without a valid session."""
 
 
 def login_redirect() -> RedirectResponse:

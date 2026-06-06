@@ -1,5 +1,5 @@
 "use strict";
-// Page Connexions : agrège les pairs OR par pays via /api/connections.
+// Connections page: aggregates OR peers by country via /api/connections.
 
 function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 

@@ -1,4 +1,4 @@
-"""Application FastAPI du dashboard de relais Tor."""
+"""FastAPI application for the Tor relay dashboard."""
 
 from __future__ import annotations
 
@@ -28,12 +28,12 @@ from .tor_controller import tor
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Fenêtres de temps proposées pour l'historique (libellé → secondes)
+# Time windows offered for the history (label -> seconds)
 RANGES = {"1h": 3600, "6h": 21600, "24h": 86400, "7d": 604800}
 
 
 async def _sampler() -> None:
-    """Échantillonne les métriques à intervalle régulier pour l'historique."""
+    """Sample the metrics at a regular interval for the history."""
     retention = settings.history_retention_days * 86400
     while True:
         try:
@@ -70,7 +70,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
-# --- gestion de l'absence d'authentification --------------------------------
+# --- handling of missing authentication -------------------------------------
 @app.exception_handler(NotAuthenticated)
 async def _on_not_authenticated(request: Request, exc: NotAuthenticated):
     if request.url.path.startswith("/api/"):
@@ -87,7 +87,7 @@ def _ctx(request: Request, **extra) -> dict:
     }
 
 
-# --- authentification -------------------------------------------------------
+# --- authentication ---------------------------------------------------------
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     if current_user(request):
@@ -190,7 +190,7 @@ async def control_action(request: Request, action: str):
         service_action(action)
         request.session["flash"] = f"Relais Tor {labels[action]} avec succès."
         if action in ("stop", "restart"):
-            tor.close()  # invalide la connexion ControlPort
+            tor.close()  # invalidate the ControlPort connection
     except HelperError as exc:
         request.session["flash_err"] = f"Échec de l'action : {exc}"
     return RedirectResponse("/control", status_code=303)
@@ -213,7 +213,7 @@ async def connections_page(request: Request):
     )
 
 
-# --- API (consommée par le front en JS) -------------------------------------
+# --- API (consumed by the JS front-end) -------------------------------------
 @app.get("/api/metrics")
 async def api_metrics(request: Request):
     require_auth(request)
