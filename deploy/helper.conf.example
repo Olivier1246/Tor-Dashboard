@@ -6,3 +6,6 @@ SERVICE="tor@default"
 
 # Chemin du torrc piloté par le dashboard
 TORRC="/etc/tor/torrc"
+
+# Utilisateur réel du démon Tor (sert à valider le torrc sous le bon compte)
+TOR_USER="debian-tor"

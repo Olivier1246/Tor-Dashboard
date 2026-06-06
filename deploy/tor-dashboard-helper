@@ -14,6 +14,7 @@ set -euo pipefail
 # Réglages surchargés par /etc/tor-dashboard/helper.conf si présent.
 SERVICE="tor@default"
 TORRC="/etc/tor/torrc"
+TOR_USER="debian-tor"          # utilisateur réel du démon Tor
 CONF="/etc/tor-dashboard/helper.conf"
 [ -r "$CONF" ] && . "$CONF"
 
@@ -32,7 +33,16 @@ case "${1:-}" in
     tmp="$(mktemp /tmp/torrc.XXXXXX)"
     trap 'rm -f "$tmp"' EXIT
     cat > "$tmp"                              # nouveau torrc depuis stdin
-    if ! tor --verify-config -f "$tmp" 1>&2; then
+    chmod 0644 "$tmp"                         # lisible par l'utilisateur Tor
+    # Valider EN TANT QU'UTILISATEUR TOR : sinon Tor croit tourner sous le
+    # mauvais user et refuse à tort le HiddenServiceDir (appartenant à
+    # debian-tor), produisant un faux « Failed to configure rendezvous options ».
+    if command -v runuser >/dev/null 2>&1; then
+      verify() { runuser -u "$TOR_USER" -- tor --verify-config -f "$tmp"; }
+    else
+      verify() { sudo -u "$TOR_USER" tor --verify-config -f "$tmp"; }
+    fi
+    if ! verify 1>&2; then
       echo "Configuration invalide — aucune modification appliquée." >&2
       exit 3
     fi

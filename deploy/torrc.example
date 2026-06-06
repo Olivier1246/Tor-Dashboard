@@ -10,6 +10,9 @@ ControlPort 9051
 # Authentification par cookie : l'utilisateur tordash doit être dans le
 # groupe debian-tor pour lire le fichier de cookie.
 CookieAuthentication 1
+# CookieAuthFileGroupReadable n'a d'effet QUE si CookieAuthFile est explicite
+# (sinon Tor avertit « will have no effect »). On fixe donc les deux.
+CookieAuthFile /run/tor/control.authcookie
 CookieAuthFileGroupReadable 1
 # (Alternative : HashedControlPassword 16:... et renseigner TOR_CONTROL_PASSWORD)
 
