@@ -24,6 +24,10 @@ RestartSec=3
 # --- Durcissement ----------------------------------------------------------
 NoNewPrivileges=false
 ProtectSystem=full
+# /etc est en lecture seule (ProtectSystem=full) ; on rouvre UNIQUEMENT
+# /etc/tor en écriture pour que le helper puisse installer le torrc validé.
+# Le helper hérite du namespace du service même via sudo.
+ReadWritePaths=/etc/tor
 ProtectHome=true
 PrivateTmp=false
 ProtectControlGroups=true
