@@ -1,5 +1,11 @@
 # Tor Relay Dashboard
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-stem-009688.svg)
+![Platform](https://img.shields.io/badge/Platform-Debian%20%7C%20Ubuntu-A81D33.svg)
+![Access](https://img.shields.io/badge/Access-Tor%20onion%20%2B%202FA-7D4698.svg)
+
 Tableau de bord web pour piloter un **relais Tor personnel** hébergé sur une VM
 Debian/Ubuntu. Il affiche les métriques du relais, permet de modifier sa
 configuration (`torrc`), et de le démarrer / arrêter / redémarrer — le tout
@@ -119,4 +125,5 @@ manage.py delete  <nom>   # supprime un compte
 
 ## Licence
 
-Usage personnel. Fourni tel quel, sans garantie.
+Distribué sous licence **MIT** — voir [LICENSE](LICENSE). Fourni tel quel, sans
+garantie. Vous êtes libre de l'utiliser, le modifier et le redistribuer.
