@@ -1,38 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Connexions · Tor Relay{% endblock %}
+{% block title %}Connections · Tor Relay{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Connexions par pays</h1>
+  <h1>Connections by country</h1>
   <div class="status-pill" id="connPill">
-    <span class="dot"></span><span id="connStatus">Chargement…</span>
+    <span class="dot"></span><span id="connStatus">Loading…</span>
   </div>
 </div>
 
 <section class="grid">
   <div class="card kpi">
-    <div class="kpi-label">Connexions OR</div>
+    <div class="kpi-label">OR connections</div>
     <div class="kpi-value" id="kTotal">—</div>
   </div>
   <div class="card kpi">
-    <div class="kpi-label">Pays distincts</div>
+    <div class="kpi-label">Distinct countries</div>
     <div class="kpi-value" id="kCountries">—</div>
   </div>
   <div class="card kpi">
-    <div class="kpi-label">Localisées</div>
+    <div class="kpi-label">Located</div>
     <div class="kpi-value" id="kResolved">—</div>
-    <div class="kpi-sub"><span id="kUnresolved">—</span> non localisées</div>
+    <div class="kpi-sub"><span id="kUnresolved">—</span> not located</div>
   </div>
 </section>
 
 <section class="card">
-  <h2>Répartition géographique</h2>
+  <h2>Geographic breakdown</h2>
   <div id="countryList" class="country-list">
-    <p class="muted">Chargement…</p>
+    <p class="muted">Loading…</p>
   </div>
   <p class="muted note">
-    Pairs relais identifiés via <code>orconn-status</code> puis localisés avec
-    la base GeoIP de Tor (<code>ip-to-country</code>). Les connexions clients
-    chiffrées ne sont pas géolocalisées individuellement.
+    Relay peers identified via <code>orconn-status</code> then located with
+    Tor's GeoIP database (<code>ip-to-country</code>). Encrypted client
+    connections are not geolocated individually.
   </p>
 </section>
 {% endblock %}

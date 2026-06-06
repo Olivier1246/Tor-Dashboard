@@ -253,7 +253,7 @@ class TorController:
             countries = [
                 {
                     "code": code,
-                    "name": country_name(code) if code != "??" else "Inconnu",
+                    "name": country_name(code) if code != "??" else "Unknown",
                     "flag": flag_emoji(code) if code != "??" else "🏴",
                     "count": n,
                     "percent": round(n * 100 / total, 1) if total else 0,

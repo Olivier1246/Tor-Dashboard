@@ -7,7 +7,7 @@ function setStatus(online) {
   const pill = document.getElementById("connPill");
   pill.classList.toggle("online", online);
   pill.classList.toggle("offline", !online);
-  setText("connStatus", online ? "Relais en ligne" : "Relais hors ligne");
+  setText("connStatus", online ? "Relay online" : "Relay offline");
 }
 
 function render(data) {
@@ -19,7 +19,7 @@ function render(data) {
   setText("kUnresolved", data.unresolved ?? "—");
 
   if (!countries.length) {
-    list.innerHTML = '<p class="muted">Aucune connexion OR active pour le moment.</p>';
+    list.innerHTML = '<p class="muted">No active OR connection at the moment.</p>';
     return;
   }
   const max = countries[0].count || 1;
@@ -44,7 +44,7 @@ async function load() {
   if (!data.online) {
     setStatus(false);
     document.getElementById("countryList").innerHTML =
-      '<p class="muted">Relais hors ligne — connexions indisponibles.</p>';
+      '<p class="muted">Relay offline — connections unavailable.</p>';
     return;
   }
   setStatus(true);

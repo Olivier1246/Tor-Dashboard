@@ -107,7 +107,7 @@ async def login_submit(
         return RedirectResponse("/", status_code=303)
     return templates.TemplateResponse(
         "login.html",
-        _ctx(request, error="Identifiants ou code 2FA invalides."),
+        _ctx(request, error="Invalid credentials or 2FA code."),
         status_code=401,
     )
 
@@ -150,11 +150,11 @@ async def config_save(request: Request, torrc: str = Form(...)):
     try:
         save_torrc(torrc)
         request.session["flash"] = (
-            "Configuration validée et enregistrée. "
-            "Redémarrez ou rechargez Tor pour l'appliquer."
+            "Configuration validated and saved. "
+            "Restart or reload Tor to apply it."
         )
     except HelperError as exc:
-        request.session["flash_err"] = f"torrc refusé : {exc}"
+        request.session["flash_err"] = f"torrc rejected: {exc}"
     return RedirectResponse("/config", status_code=303)
 
 
@@ -178,21 +178,21 @@ async def control_page(request: Request):
 async def control_action(request: Request, action: str):
     require_auth(request)
     labels = {
-        "start": "démarré",
-        "stop": "arrêté",
-        "restart": "redémarré",
-        "reload": "rechargé",
+        "start": "started",
+        "stop": "stopped",
+        "restart": "restarted",
+        "reload": "reloaded",
     }
     if action not in labels:
-        request.session["flash_err"] = "Action inconnue."
+        request.session["flash_err"] = "Unknown action."
         return RedirectResponse("/control", status_code=303)
     try:
         service_action(action)
-        request.session["flash"] = f"Relais Tor {labels[action]} avec succès."
+        request.session["flash"] = f"Tor relay {labels[action]} successfully."
         if action in ("stop", "restart"):
             tor.close()  # invalidate the ControlPort connection
     except HelperError as exc:
-        request.session["flash_err"] = f"Échec de l'action : {exc}"
+        request.session["flash_err"] = f"Action failed: {exc}"
     return RedirectResponse("/control", status_code=303)
 
 

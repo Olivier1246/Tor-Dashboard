@@ -29,14 +29,14 @@ def _run(args: list[str], input_data: str | None = None) -> str:
     )
     if proc.returncode != 0:
         msg = (proc.stderr or proc.stdout or "").strip()
-        raise HelperError(msg or f"helper a échoué (code {proc.returncode})")
+        raise HelperError(msg or f"helper failed (code {proc.returncode})")
     return proc.stdout.strip()
 
 
 def service_action(action: str) -> str:
     """Run start/stop/restart/reload on Tor's systemd unit."""
     if action not in _VALID_ACTIONS:
-        raise ValueError(f"action invalide : {action}")
+        raise ValueError(f"invalid action: {action}")
     return _run([action])
 
 

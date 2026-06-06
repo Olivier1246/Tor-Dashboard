@@ -11,9 +11,6 @@ It displays the relay metrics, lets you edit its configuration (`torrc`), and
 start / stop / restart it — all behind strong authentication and reachable
 **outside the LAN through an onion service** (no port open on the Internet).
 
-> The user interface is in French; the code, comments and documentation are in
-> English.
-
 ## Features
 
 - **Real-time metrics**: upload/download rates (sparklines), cumulative

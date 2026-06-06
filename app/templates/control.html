@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Contrôle · Tor Relay{% endblock %}
+{% block title %}Control · Tor Relay{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Contrôle du service</h1>
+  <h1>Service control</h1>
   <span class="muted mono">{{ service }}</span>
 </div>
 
@@ -10,7 +10,7 @@
 {% if flash_err %}<div class="alert alert-err"><pre>{{ flash_err }}</pre></div>{% endif %}
 
 <section class="card">
-  <h2>État systemd</h2>
+  <h2>systemd status</h2>
   {% set ok = status == 'active' %}
   <div class="status-pill big {{ 'on' if ok else 'off' }}">
     <span class="dot"></span>{{ status }}
@@ -18,22 +18,22 @@
 
   <div class="control-grid">
     <form method="post" action="/control/start">
-      <button class="btn btn-ok" {{ 'disabled' if ok }}>▶ Démarrer</button>
+      <button class="btn btn-ok" {{ 'disabled' if ok }}>▶ Start</button>
     </form>
     <form method="post" action="/control/restart">
-      <button class="btn btn-warn">⟳ Redémarrer</button>
+      <button class="btn btn-warn">⟳ Restart</button>
     </form>
     <form method="post" action="/control/reload">
-      <button class="btn">↻ Recharger la config</button>
+      <button class="btn">↻ Reload config</button>
     </form>
     <form method="post" action="/control/stop"
-          onsubmit="return confirm('Arrêter le relais Tor ? Le dashboard restera accessible mais ne recevra plus de métriques.');">
-      <button class="btn btn-danger" {{ 'disabled' if not ok }}>■ Arrêter</button>
+          onsubmit="return confirm('Stop the Tor relay? The dashboard stays reachable but will no longer receive metrics.');">
+      <button class="btn btn-danger" {{ 'disabled' if not ok }}>■ Stop</button>
     </form>
   </div>
   <p class="muted">
-    <strong>Recharger</strong> applique le torrc sans couper les circuits
-    (signal HUP). <strong>Redémarrer</strong> relance complètement le service.
+    <strong>Reload</strong> applies the torrc without dropping circuits
+    (HUP signal). <strong>Restart</strong> fully restarts the service.
   </p>
 </section>
 {% endblock %}

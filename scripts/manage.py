@@ -49,22 +49,22 @@ def _save(users: dict) -> None:
 
 def _ask_password() -> str:
     while True:
-        p1 = getpass.getpass("Mot de passe : ")
+        p1 = getpass.getpass("Password: ")
         if len(p1) < 10:
-            print("  → 10 caractères minimum.")
+            print("  -> 10 characters minimum.")
             continue
-        p2 = getpass.getpass("Confirmer    : ")
+        p2 = getpass.getpass("Confirm : ")
         if p1 != p2:
-            print("  → les mots de passe diffèrent.")
+            print("  -> passwords differ.")
             continue
         return p1
 
 
 def _print_totp(username: str, secret: str) -> None:
     uri = pyotp.TOTP(secret).provisioning_uri(name=username, issuer_name=ISSUER)
-    print("\nSecret TOTP :", secret)
-    print("URI otpauth :", uri)
-    print("\nScannez ce QR code dans votre application 2FA :\n")
+    print("\nTOTP secret:", secret)
+    print("otpauth URI:", uri)
+    print("\nScan this QR code in your 2FA app:\n")
     qr = qrcode.QRCode(border=1)
     qr.add_data(uri)
     qr.make(fit=True)
@@ -74,7 +74,7 @@ def _print_totp(username: str, secret: str) -> None:
 def cmd_useradd(username: str) -> None:
     users = _load()
     if username in users:
-        print(f"L'utilisateur « {username} » existe déjà.")
+        print(f'User "{username}" already exists.')
         sys.exit(1)
     password = _ask_password()
     secret = pyotp.random_base32()
@@ -83,24 +83,24 @@ def cmd_useradd(username: str) -> None:
         "totp_secret": secret,
     }
     _save(users)
-    print(f"\n✔ Utilisateur « {username} » créé dans {settings.users_path}")
+    print(f'\n✔ User "{username}" created in {settings.users_path}')
     _print_totp(username, secret)
 
 
 def cmd_passwd(username: str) -> None:
     users = _load()
     if username not in users:
-        print(f"Utilisateur inconnu : {username}")
+        print(f"Unknown user: {username}")
         sys.exit(1)
     users[username]["password_hash"] = hash_password(_ask_password())
     _save(users)
-    print("✔ Mot de passe mis à jour.")
+    print("✔ Password updated.")
 
 
 def cmd_list() -> None:
     users = _load()
     if not users:
-        print("Aucun utilisateur.")
+        print("No users.")
         return
     for name in users:
         print(" -", name)
@@ -109,10 +109,10 @@ def cmd_list() -> None:
 def cmd_delete(username: str) -> None:
     users = _load()
     if users.pop(username, None) is None:
-        print(f"Utilisateur inconnu : {username}")
+        print(f"Unknown user: {username}")
         sys.exit(1)
     _save(users)
-    print(f"✔ Utilisateur « {username} » supprimé.")
+    print(f'✔ User "{username}" deleted.')
 
 
 def main() -> None:

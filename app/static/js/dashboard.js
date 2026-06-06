@@ -11,7 +11,7 @@ let prev = null; // { t, read, written }
 
 function fmtBytes(n) {
   if (n == null || isNaN(n)) return "—";
-  const u = ["o", "Ko", "Mo", "Go", "To", "Po"];
+  const u = ["B", "KB", "MB", "GB", "TB", "PB"];
   let i = 0;
   n = Number(n);
   while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
@@ -28,7 +28,7 @@ function fmtUptime(s) {
   const d = Math.floor(s / 86400);
   const h = Math.floor((s % 86400) / 3600);
   const m = Math.floor((s % 3600) / 60);
-  if (d > 0) return `${d}j ${h}h ${m}m`;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }
@@ -77,7 +77,7 @@ function setOnline(online) {
     pill.classList.toggle("online", online);
     pill.classList.toggle("offline", !online);
   }
-  setText("statusText", online ? "Relais en ligne" : "Relais hors ligne");
+  setText("statusText", online ? "Relay online" : "Relay offline");
   if (banner) banner.classList.toggle("hidden", online);
 }
 
@@ -85,7 +85,7 @@ function renderFlags(flags) {
   const box = document.getElementById("flags");
   if (!box) return;
   if (!flags || flags.length === 0) {
-    box.innerHTML = '<span class="muted">Aucun drapeau (relais non encore publié ?)</span>';
+    box.innerHTML = '<span class="muted">No flags (relay not yet published?)</span>';
     return;
   }
   box.innerHTML = flags.map(f => `<span class="flag">${f}</span>`).join("");
@@ -95,7 +95,7 @@ function renderAccounting(a) {
   const body = document.getElementById("acctBody");
   if (!body) return;
   if (!a || !a.enabled) {
-    body.innerHTML = '<p class="muted">Aucune limite de comptabilité configurée.</p>';
+    body.innerHTML = '<p class="muted">No accounting limit configured.</p>';
     return;
   }
   const usedR = a.read_used || 0, usedW = a.written_used || 0;
@@ -106,10 +106,10 @@ function renderAccounting(a) {
   body.innerHTML = `
     <div class="acct-bar"><div style="width:${pct}%"></div></div>
     <dl class="kv">
-      <dt>Utilisé</dt><dd>${fmtBytes(usedR + usedW)} (${pct}%)</dd>
-      <dt>Restant</dt><dd>${fmtBytes(leftR + leftW)}</dd>
-      <dt>Fin de période</dt><dd>${a.interval_end || "—"}</dd>
-      <dt>Hibernation</dt><dd>${a.hibernating || "—"}</dd>
+      <dt>Used</dt><dd>${fmtBytes(usedR + usedW)} (${pct}%)</dd>
+      <dt>Remaining</dt><dd>${fmtBytes(leftR + leftW)}</dd>
+      <dt>Period end</dt><dd>${a.interval_end || "—"}</dd>
+      <dt>Hibernating</dt><dd>${a.hibernating || "—"}</dd>
     </dl>`;
 }
 
@@ -149,11 +149,11 @@ async function tick() {
   setText("nickname", m.nickname || "—");
   setText("fingerprint", m.fingerprint || "—");
   setText("version", m.version || "—");
-  setText("onion", m.onion || "non publiée");
+  setText("onion", m.onion || "not published");
   setText("readTotal", fmtBytes(m.read_total));
   setText("writtenTotal", fmtBytes(m.written_total));
-  setText("confRate", m.rate ? fmtBytes(m.rate) + "/s" : "illimité");
-  setText("confBurst", m.burst ? fmtBytes(m.burst) + "/s" : "illimité");
+  setText("confRate", m.rate ? fmtBytes(m.rate) + "/s" : "unlimited");
+  setText("confBurst", m.burst ? fmtBytes(m.burst) + "/s" : "unlimited");
   setText("exitPolicy", m.exit_policy || "—");
   renderFlags(m.flags);
   renderAccounting(m.accounting);

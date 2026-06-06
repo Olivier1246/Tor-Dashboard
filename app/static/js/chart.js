@@ -51,7 +51,7 @@ function drawLineChart(canvas, opts) {
   if (!isFinite(tMin) || tMax === tMin) {
     ctx.fillStyle = ChartColors.text;
     ctx.font = "13px system-ui";
-    ctx.fillText("Données insuffisantes", padL, padT + plotH / 2);
+    ctx.fillText("Not enough data", padL, padT + plotH / 2);
     return;
   }
   vMax = niceMax(vMax);
@@ -126,10 +126,10 @@ function drawLineChart(canvas, opts) {
 
 function fmtBytesPerSec(v) {
   if (v == null) return "0";
-  const u = ["o", "K", "M", "G", "T"];
+  const u = ["", "K", "M", "G", "T"];
   let i = 0;
   while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
-  return (i === 0 ? Math.round(v) : v.toFixed(1)) + " " + u[i] + "o/s";
+  return (i === 0 ? Math.round(v) : v.toFixed(1)) + " " + u[i] + "B/s";
 }
 
 window.TorChart = { drawLineChart, fmtBytesPerSec };

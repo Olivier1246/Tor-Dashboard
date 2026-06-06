@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,15 +16,15 @@
     <span>Tor&nbsp;Relay</span>
   </div>
   <nav class="menu">
-    <a href="/" class="{{ 'active' if page == 'dashboard' }}">Tableau de bord</a>
-    <a href="/history" class="{{ 'active' if page == 'history' }}">Historique</a>
-    <a href="/connections" class="{{ 'active' if page == 'connections' }}">Connexions</a>
+    <a href="/" class="{{ 'active' if page == 'dashboard' }}">Dashboard</a>
+    <a href="/history" class="{{ 'active' if page == 'history' }}">History</a>
+    <a href="/connections" class="{{ 'active' if page == 'connections' }}">Connections</a>
     <a href="/config" class="{{ 'active' if page == 'config' }}">Configuration</a>
-    <a href="/control" class="{{ 'active' if page == 'control' }}">Contrôle</a>
+    <a href="/control" class="{{ 'active' if page == 'control' }}">Control</a>
   </nav>
   <div class="userbox">
     <span class="who">{{ user }}</span>
-    <a class="logout" href="/logout">Déconnexion</a>
+    <a class="logout" href="/logout">Log out</a>
   </div>
 </header>
 {% endif %}
@@ -34,7 +34,7 @@
 </main>
 
 <footer class="footer">
-  Tor Relay Dashboard v{{ version }} · accès via service onion
+  Tor Relay Dashboard v{{ version }} · access via onion service
 </footer>
 {% block scripts %}{% endblock %}
 </body>

@@ -43,11 +43,11 @@ case "${1:-}" in
       verify() { sudo -u "$TOR_USER" tor --verify-config -f "$tmp"; }
     fi
     if ! verify 1>&2; then
-      echo "Configuration invalide — aucune modification appliquée." >&2
+      echo "Invalid configuration -- no change applied." >&2
       exit 3
     fi
     install -o root -g root -m 644 "$tmp" "$TORRC"
-    echo "torrc validé et installé."
+    echo "torrc validated and installed."
     ;;
   *) usage ;;
 esac

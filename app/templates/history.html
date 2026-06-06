@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Historique · Tor Relay{% endblock %}
+{% block title %}History · Tor Relay{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Historique</h1>
+  <h1>History</h1>
   <div class="range-tabs" id="rangeTabs">
     {% for r in ranges %}
     <button class="range-tab {{ 'active' if r == '24h' }}" data-range="{{ r }}">{{ r }}</button>
@@ -12,16 +12,16 @@
 
 <section class="card">
   <div class="chart-head">
-    <h2>Bande passante</h2>
+    <h2>Bandwidth</h2>
     <div class="legend">
-      <span class="leg"><i class="sw" style="background:#a368c4"></i>Descendant</span>
-      <span class="leg"><i class="sw" style="background:#3fb950"></i>Montant</span>
+      <span class="leg"><i class="sw" style="background:#a368c4"></i>Download</span>
+      <span class="leg"><i class="sw" style="background:#3fb950"></i>Upload</span>
     </div>
   </div>
   <canvas id="bwChart" height="260"></canvas>
   <p class="muted chart-empty hidden" id="bwEmpty">
-    Pas encore de données sur cette période. L'historique se construit à mesure
-    que le dashboard tourne (échantillon toutes les {{ '%d'|format(60) }} s).
+    No data yet for this period. The history builds up as the dashboard runs
+    (one sample every {{ '%d'|format(60) }} s).
   </p>
 </section>
 
@@ -31,7 +31,7 @@
     <canvas id="circChart" height="160"></canvas>
   </div>
   <div class="card">
-    <h2>Connexions OR</h2>
+    <h2>OR connections</h2>
     <canvas id="connChart" height="160"></canvas>
   </div>
 </section>

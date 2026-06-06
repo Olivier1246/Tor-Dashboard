@@ -10,14 +10,14 @@ from .config import settings
 
 # Directives presented as "quick" fields in the UI.
 QUICK_KEYS = [
-    ("Nickname", "Nom du relais"),
+    ("Nickname", "Relay name"),
     ("ContactInfo", "Contact (email)"),
-    ("ORPort", "Port OR"),
-    ("RelayBandwidthRate", "Débit moyen (ex. 10 MBytes)"),
-    ("RelayBandwidthBurst", "Débit en rafale (ex. 20 MBytes)"),
-    ("AccountingMax", "Quota de trafic (ex. 1 TBytes)"),
-    ("AccountingStart", "Début de période (ex. month 1 00:00)"),
-    ("ExitRelay", "Relais de sortie (0/1)"),
+    ("ORPort", "OR port"),
+    ("RelayBandwidthRate", "Average rate (e.g. 10 MBytes)"),
+    ("RelayBandwidthBurst", "Burst rate (e.g. 20 MBytes)"),
+    ("AccountingMax", "Traffic quota (e.g. 1 TBytes)"),
+    ("AccountingStart", "Period start (e.g. month 1 00:00)"),
+    ("ExitRelay", "Exit relay (0/1)"),
 ]
 
 
@@ -29,7 +29,7 @@ def read_torrc() -> str:
     except FileNotFoundError:
         return ""
     except PermissionError:
-        return "# (Lecture impossible : permissions insuffisantes sur le torrc)"
+        return "# (Cannot read: insufficient permissions on the torrc)"
 
 
 def parse_quick_values(content: str) -> dict[str, str]:

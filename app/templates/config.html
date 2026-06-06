@@ -2,7 +2,7 @@
 {% block title %}Configuration · Tor Relay{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Configuration du relais</h1>
+  <h1>Relay configuration</h1>
   <span class="muted mono">{{ torrc_path }}</span>
 </div>
 
@@ -11,10 +11,10 @@
 
 <form method="post" action="/config">
   <section class="card">
-    <h2>Réglages rapides</h2>
+    <h2>Quick settings</h2>
     <p class="muted">
-      Ces champs aident à repérer les directives clés. La modification se fait
-      dans l'éditeur ci-dessous (source de vérité). Les valeurs actuelles :
+      These fields help you spot the key directives. Editing happens in the
+      editor below (the source of truth). Current values:
     </p>
     <div class="grid grid-2">
       {% for key, label in quick_keys %}
@@ -28,16 +28,16 @@
   </section>
 
   <section class="card">
-    <h2>Éditeur torrc</h2>
+    <h2>torrc editor</h2>
     <p class="muted">
-      La configuration est <strong>validée par <code>tor --verify-config</code></strong>
-      avant enregistrement. Un torrc invalide est rejeté sans rien écraser.
+      The configuration is <strong>validated by <code>tor --verify-config</code></strong>
+      before saving. An invalid torrc is rejected without overwriting anything.
     </p>
     <textarea name="torrc" class="editor" spellcheck="false"
               wrap="off">{{ torrc }}</textarea>
     <div class="form-actions">
-      <button class="btn btn-primary" type="submit">Valider &amp; enregistrer</button>
-      <a class="btn" href="/control">Aller au contrôle →</a>
+      <button class="btn btn-primary" type="submit">Validate &amp; save</button>
+      <a class="btn" href="/control">Go to control →</a>
     </div>
   </section>
 </form>
