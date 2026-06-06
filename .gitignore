@@ -12,6 +12,12 @@ __pycache__/
 venv/
 *.egg-info/
 
+# Demo/screenshot generation artifacts
+tools/demo_users.json
+tools/demo_*.db
+tools/demo_*.db-journal
+tools/demo_*.db-wal
+
 # Misc
 .DS_Store
 *.log

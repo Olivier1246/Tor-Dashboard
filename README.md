@@ -11,6 +11,18 @@ It displays the relay metrics, lets you edit its configuration (`torrc`), and
 start / stop / restart it — all behind strong authentication and reachable
 **outside the LAN through an onion service** (no port open on the Internet).
 
+## Screenshots
+
+> Demo data — a real relay populates these views through the ControlPort.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+| History | Connections by country |
+|---------|------------------------|
+| ![History](docs/screenshots/history.png) | ![Connections](docs/screenshots/connections.png) |
+| **Configuration** | **Control** |
+| ![Configuration](docs/screenshots/config.png) | ![Control](docs/screenshots/control.png) |
+
 ## Features
 
 - **Real-time metrics**: upload/download rates (sparklines), cumulative

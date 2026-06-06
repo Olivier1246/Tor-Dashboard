@@ -1,0 +1,20 @@
+## Sample torrc for the demo screenshots
+Nickname NebulaGuard
+ContactInfo admin@example.org
+ORPort 9001
+ControlPort 9051
+CookieAuthentication 1
+CookieAuthFile /run/tor/control.authcookie
+CookieAuthFileGroupReadable 1
+
+RelayBandwidthRate 12 MBytes
+RelayBandwidthBurst 24 MBytes
+AccountingMax 2 TBytes
+AccountingStart month 1 00:00
+
+ExitRelay 0
+ExitPolicy reject *:*
+
+HiddenServiceDir /var/lib/tor/dashboard/
+HiddenServicePort 80 127.0.0.1:8080
+HiddenServiceVersion 3

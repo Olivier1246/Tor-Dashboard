@@ -4,6 +4,7 @@
 
 const POLL_MS = 3000;
 const HISTORY = 40;
+const SPARK_H = 40; // logical sparkline height (px)
 
 const histDown = [];
 const histUp = [];
@@ -43,11 +44,12 @@ function drawSpark(canvasId, data, color) {
   if (!c) return;
   const dpr = window.devicePixelRatio || 1;
   const w = c.clientWidth || 200;
-  const h = c.height;
+  const h = SPARK_H;
+  c.style.height = h + "px";       // lock layout height (avoid runaway growth)
   c.width = w * dpr;
   c.height = h * dpr;
   const ctx = c.getContext("2d");
-  ctx.scale(dpr, dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
   if (data.length < 2) return;
   const max = Math.max(...data, 1);

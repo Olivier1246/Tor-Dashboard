@@ -27,8 +27,14 @@ function fmtTimeLabel(ts, rangeSec) {
 // opts: { yFormat(v)->str, rangeSec, series:[{data:[{t,v}], color}] }
 function drawLineChart(canvas, opts) {
   const dpr = window.devicePixelRatio || 1;
+  // Cache the logical height once: setting canvas.height mutates the height
+  // attribute, so re-reading it each call would make the chart grow endlessly.
+  if (!canvas._logicalH) {
+    canvas._logicalH = parseInt(canvas.getAttribute("height"), 10) || 200;
+  }
   const W = canvas.clientWidth || 600;
-  const H = parseInt(canvas.getAttribute("height"), 10) || 200;
+  const H = canvas._logicalH;
+  canvas.style.height = H + "px";
   canvas.width = W * dpr;
   canvas.height = H * dpr;
   const ctx = canvas.getContext("2d");
