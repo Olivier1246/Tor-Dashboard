@@ -1,0 +1,20 @@
+# Normalisation des fins de ligne.
+# Par défaut : LF dans le dépôt (déploiement sur VM Linux).
+* text=auto eol=lf
+
+# Scripts et fichiers de déploiement Linux : LF obligatoire (sinon bash casse)
+*.sh                          text eol=lf
+*.py                          text eol=lf
+deploy/tor-dashboard-helper   text eol=lf
+deploy/tor-dashboard.service  text eol=lf
+deploy/sudoers-tor-dashboard  text eol=lf
+deploy/helper.conf.example    text eol=lf
+
+# Fichiers spécifiques Windows
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binaires (jamais de conversion)
+*.png binary
+*.jpg binary
+*.ico binary

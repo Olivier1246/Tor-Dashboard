@@ -1,0 +1,39 @@
+# Unité systemd du dashboard.
+# Démarre APRÈS le relais Tor (After=/Requires=tor.service) afin que le
+# ControlPort soit disponible dès le lancement.  → /etc/systemd/system/
+
+[Unit]
+Description=Tor Relay Dashboard
+Documentation=https://localhost/
+After=network-online.target tor.service
+Wants=network-online.target
+Requires=tor.service
+
+[Service]
+Type=simple
+User=tordash
+Group=tordash
+SupplementaryGroups=debian-tor
+WorkingDirectory=/opt/tor-dashboard
+EnvironmentFile=/opt/tor-dashboard/.env
+ExecStart=/opt/tor-dashboard/.venv/bin/uvicorn app.main:app \
+          --host 127.0.0.1 --port 8080 --proxy-headers
+Restart=on-failure
+RestartSec=3
+
+# --- Durcissement ----------------------------------------------------------
+NoNewPrivileges=false
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=false
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+# NoNewPrivileges reste à false car le dashboard appelle sudo (helper).
+# PrivateTmp à false pour partager /tmp avec le helper lors de savetorrc.
+
+[Install]
+WantedBy=multi-user.target

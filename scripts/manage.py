@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""Gestion des comptes du dashboard (mot de passe + secret TOTP).
+
+Usage :
+    python scripts/manage.py useradd <identifiant>
+    python scripts/manage.py passwd  <identifiant>
+    python scripts/manage.py list
+    python scripts/manage.py delete  <identifiant>
+
+Le secret TOTP est généré aléatoirement et affiché sous forme d'URI
+otpauth:// + QR code ASCII à scanner avec Google Authenticator / Aegis / etc.
+"""
+
+from __future__ import annotations
+
+import getpass
+import json
+import sys
+from pathlib import Path
+
+# Permet d'importer le package app/ depuis la racine du projet
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import pyotp  # noqa: E402
+import qrcode  # noqa: E402
+
+from app.auth import hash_password  # noqa: E402
+from app.config import settings  # noqa: E402
+
+ISSUER = "Tor Relay Dashboard"
+
+
+def _load() -> dict:
+    try:
+        return json.loads(settings.users_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _save(users: dict) -> None:
+    settings.users_path.write_text(
+        json.dumps(users, indent=2), encoding="utf-8"
+    )
+    try:
+        settings.users_path.chmod(0o600)
+    except OSError:
+        pass
+
+
+def _ask_password() -> str:
+    while True:
+        p1 = getpass.getpass("Mot de passe : ")
+        if len(p1) < 10:
+            print("  → 10 caractères minimum.")
+            continue
+        p2 = getpass.getpass("Confirmer    : ")
+        if p1 != p2:
+            print("  → les mots de passe diffèrent.")
+            continue
+        return p1
+
+
+def _print_totp(username: str, secret: str) -> None:
+    uri = pyotp.TOTP(secret).provisioning_uri(name=username, issuer_name=ISSUER)
+    print("\nSecret TOTP :", secret)
+    print("URI otpauth :", uri)
+    print("\nScannez ce QR code dans votre application 2FA :\n")
+    qr = qrcode.QRCode(border=1)
+    qr.add_data(uri)
+    qr.make(fit=True)
+    qr.print_ascii(invert=True)
+
+
+def cmd_useradd(username: str) -> None:
+    users = _load()
+    if username in users:
+        print(f"L'utilisateur « {username} » existe déjà.")
+        sys.exit(1)
+    password = _ask_password()
+    secret = pyotp.random_base32()
+    users[username] = {
+        "password_hash": hash_password(password),
+        "totp_secret": secret,
+    }
+    _save(users)
+    print(f"\n✔ Utilisateur « {username} » créé dans {settings.users_path}")
+    _print_totp(username, secret)
+
+
+def cmd_passwd(username: str) -> None:
+    users = _load()
+    if username not in users:
+        print(f"Utilisateur inconnu : {username}")
+        sys.exit(1)
+    users[username]["password_hash"] = hash_password(_ask_password())
+    _save(users)
+    print("✔ Mot de passe mis à jour.")
+
+
+def cmd_list() -> None:
+    users = _load()
+    if not users:
+        print("Aucun utilisateur.")
+        return
+    for name in users:
+        print(" -", name)
+
+
+def cmd_delete(username: str) -> None:
+    users = _load()
+    if users.pop(username, None) is None:
+        print(f"Utilisateur inconnu : {username}")
+        sys.exit(1)
+    _save(users)
+    print(f"✔ Utilisateur « {username} » supprimé.")
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    if not args:
+        print(__doc__)
+        sys.exit(0)
+    cmd, *rest = args
+    if cmd == "useradd" and rest:
+        cmd_useradd(rest[0])
+    elif cmd == "passwd" and rest:
+        cmd_passwd(rest[0])
+    elif cmd == "list":
+        cmd_list()
+    elif cmd == "delete" and rest:
+        cmd_delete(rest[0])
+    else:
+        print(__doc__)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

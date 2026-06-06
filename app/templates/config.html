@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Configuration · Tor Relay{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Configuration du relais</h1>
+  <span class="muted mono">{{ torrc_path }}</span>
+</div>
+
+{% if flash %}<div class="alert alert-ok">{{ flash }}</div>{% endif %}
+{% if flash_err %}<div class="alert alert-err"><pre>{{ flash_err }}</pre></div>{% endif %}
+
+<form method="post" action="/config">
+  <section class="card">
+    <h2>Réglages rapides</h2>
+    <p class="muted">
+      Ces champs aident à repérer les directives clés. La modification se fait
+      dans l'éditeur ci-dessous (source de vérité). Les valeurs actuelles :
+    </p>
+    <div class="grid grid-2">
+      {% for key, label in quick_keys %}
+      <div class="quick">
+        <span class="quick-key mono">{{ key }}</span>
+        <span class="quick-label">{{ label }}</span>
+        <span class="quick-val mono">{{ quick_values.get(key, '—') }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Éditeur torrc</h2>
+    <p class="muted">
+      La configuration est <strong>validée par <code>tor --verify-config</code></strong>
+      avant enregistrement. Un torrc invalide est rejeté sans rien écraser.
+    </p>
+    <textarea name="torrc" class="editor" spellcheck="false"
+              wrap="off">{{ torrc }}</textarea>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Valider &amp; enregistrer</button>
+      <a class="btn" href="/control">Aller au contrôle →</a>
+    </div>
+  </section>
+</form>
+{% endblock %}

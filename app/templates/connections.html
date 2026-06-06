@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Connexions · Tor Relay{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Connexions par pays</h1>
+  <div class="status-pill" id="connPill">
+    <span class="dot"></span><span id="connStatus">Chargement…</span>
+  </div>
+</div>
+
+<section class="grid">
+  <div class="card kpi">
+    <div class="kpi-label">Connexions OR</div>
+    <div class="kpi-value" id="kTotal">—</div>
+  </div>
+  <div class="card kpi">
+    <div class="kpi-label">Pays distincts</div>
+    <div class="kpi-value" id="kCountries">—</div>
+  </div>
+  <div class="card kpi">
+    <div class="kpi-label">Localisées</div>
+    <div class="kpi-value" id="kResolved">—</div>
+    <div class="kpi-sub"><span id="kUnresolved">—</span> non localisées</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Répartition géographique</h2>
+  <div id="countryList" class="country-list">
+    <p class="muted">Chargement…</p>
+  </div>
+  <p class="muted note">
+    Pairs relais identifiés via <code>orconn-status</code> puis localisés avec
+    la base GeoIP de Tor (<code>ip-to-country</code>). Les connexions clients
+    chiffrées ne sont pas géolocalisées individuellement.
+  </p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/connections.js"></script>
+{% endblock %}

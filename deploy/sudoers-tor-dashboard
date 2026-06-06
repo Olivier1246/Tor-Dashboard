@@ -1,0 +1,8 @@
+# Autorise l'utilisateur du dashboard à n'exécuter QUE le helper, sans mot de
+# passe. Installer dans /etc/sudoers.d/tor-dashboard (mode 0440) puis vérifier
+# avec :  visudo -cf /etc/sudoers.d/tor-dashboard
+#
+# Le helper est root et non modifiable par tordash : la surface est limitée à
+# ses sous-commandes fixes (start/stop/restart/reload/status/savetorrc).
+
+tordash ALL=(root) NOPASSWD: /usr/local/bin/tor-dashboard-helper

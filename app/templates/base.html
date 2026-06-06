@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Tor Relay Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+{% if user %}
+<header class="topbar">
+  <div class="brand">
+    <img src="/static/favicon.svg" alt="" class="logo" width="28" height="28">
+    <span>Tor&nbsp;Relay</span>
+  </div>
+  <nav class="menu">
+    <a href="/" class="{{ 'active' if page == 'dashboard' }}">Tableau de bord</a>
+    <a href="/history" class="{{ 'active' if page == 'history' }}">Historique</a>
+    <a href="/connections" class="{{ 'active' if page == 'connections' }}">Connexions</a>
+    <a href="/config" class="{{ 'active' if page == 'config' }}">Configuration</a>
+    <a href="/control" class="{{ 'active' if page == 'control' }}">Contrôle</a>
+  </nav>
+  <div class="userbox">
+    <span class="who">{{ user }}</span>
+    <a class="logout" href="/logout">Déconnexion</a>
+  </div>
+</header>
+{% endif %}
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  Tor Relay Dashboard v{{ version }} · accès via service onion
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

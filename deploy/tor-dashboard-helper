@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# tor-dashboard-helper — unique point d'élévation de privilèges du dashboard.
+#
+# Installé en root dans /usr/local/bin et autorisé via sudoers SANS mot de
+# passe pour l'utilisateur du dashboard. Il n'expose QUE des sous-commandes
+# fixes : aucune commande arbitraire ne peut être exécutée en root.
+#
+#   tor-dashboard-helper start|stop|restart|reload|status
+#   tor-dashboard-helper savetorrc      (lit le nouveau torrc sur stdin)
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+# Réglages surchargés par /etc/tor-dashboard/helper.conf si présent.
+SERVICE="tor@default"
+TORRC="/etc/tor/torrc"
+CONF="/etc/tor-dashboard/helper.conf"
+[ -r "$CONF" ] && . "$CONF"
+
+usage() {
+  echo "usage: $0 {start|stop|restart|reload|status|savetorrc}" >&2
+  exit 64
+}
+
+case "${1:-}" in
+  start)   exec systemctl start   "$SERVICE" ;;
+  stop)    exec systemctl stop    "$SERVICE" ;;
+  restart) exec systemctl restart "$SERVICE" ;;
+  reload)  exec systemctl reload  "$SERVICE" ;;
+  status)  exec systemctl is-active "$SERVICE" ;;
+  savetorrc)
+    tmp="$(mktemp /tmp/torrc.XXXXXX)"
+    trap 'rm -f "$tmp"' EXIT
+    cat > "$tmp"                              # nouveau torrc depuis stdin
+    if ! tor --verify-config -f "$tmp" 1>&2; then
+      echo "Configuration invalide — aucune modification appliquée." >&2
+      exit 3
+    fi
+    install -o root -g root -m 644 "$tmp" "$TORRC"
+    echo "torrc validé et installé."
+    ;;
+  *) usage ;;
+esac

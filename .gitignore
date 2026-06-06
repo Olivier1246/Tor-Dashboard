@@ -1,0 +1,17 @@
+# Secrets & état local
+.env
+users.json
+*.db
+*.db-journal
+*.db-wal
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Divers
+.DS_Store
+*.log

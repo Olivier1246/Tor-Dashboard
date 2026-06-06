@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord · Tor Relay{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Tableau de bord</h1>
+  <div class="status-pill" id="statusPill">
+    <span class="dot"></span><span id="statusText">Connexion…</span>
+  </div>
+</div>
+
+<section class="grid">
+  <div class="card kpi">
+    <div class="kpi-label">Débit descendant</div>
+    <div class="kpi-value"><span id="rateDown">—</span><span class="unit">/s</span></div>
+    <canvas id="sparkDown" height="40"></canvas>
+  </div>
+  <div class="card kpi">
+    <div class="kpi-label">Débit montant</div>
+    <div class="kpi-value"><span id="rateUp">—</span><span class="unit">/s</span></div>
+    <canvas id="sparkUp" height="40"></canvas>
+  </div>
+  <div class="card kpi">
+    <div class="kpi-label">Temps de fonctionnement</div>
+    <div class="kpi-value" id="uptime">—</div>
+    <div class="kpi-sub">Bootstrap <span id="bootstrap">—</span>%</div>
+  </div>
+  <div class="card kpi">
+    <div class="kpi-label">Circuits actifs</div>
+    <div class="kpi-value" id="circuits">—</div>
+    <div class="kpi-sub"><span id="connections">—</span> connexions</div>
+  </div>
+</section>
+
+<section class="grid grid-2">
+  <div class="card">
+    <h2>Identité du relais</h2>
+    <dl class="kv">
+      <dt>Surnom</dt><dd id="nickname">—</dd>
+      <dt>Empreinte</dt><dd class="mono" id="fingerprint">—</dd>
+      <dt>Version Tor</dt><dd id="version">—</dd>
+      <dt>Adresse onion (dashboard)</dt><dd class="mono" id="onion">—</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Drapeaux & politique</h2>
+    <div class="flags" id="flags"><span class="muted">—</span></div>
+    <h3>Politique de sortie</h3>
+    <pre class="policy" id="exitPolicy">—</pre>
+  </div>
+</section>
+
+<section class="grid grid-2">
+  <div class="card">
+    <h2>Trafic cumulé (depuis le démarrage)</h2>
+    <dl class="kv">
+      <dt>Reçu</dt><dd id="readTotal">—</dd>
+      <dt>Envoyé</dt><dd id="writtenTotal">—</dd>
+      <dt>Débit configuré</dt><dd id="confRate">—</dd>
+      <dt>Rafale max</dt><dd id="confBurst">—</dd>
+    </dl>
+  </div>
+
+  <div class="card" id="acctCard">
+    <h2>Quota de bande passante</h2>
+    <div id="acctBody"><p class="muted">Aucune limite de comptabilité configurée.</p></div>
+  </div>
+</section>
+
+<div class="alert alert-err hidden" id="offlineBanner">
+  ⚠️ Le relais Tor ne répond pas sur le ControlPort. Il est peut-être arrêté —
+  consultez la page <a href="/control">Contrôle</a>.
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

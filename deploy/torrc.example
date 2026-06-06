@@ -1,0 +1,32 @@
+# ===========================================================================
+# Extrait de torrc à fusionner avec votre /etc/tor/torrc
+# Active : (1) le ControlPort pour les métriques, (2) l'onion service du
+# dashboard pour l'accès distant sécurisé.
+# ===========================================================================
+
+## --- 1. ControlPort (lecture des métriques par le dashboard) --------------
+# Le dashboard s'y connecte en local pour lire l'état du relais.
+ControlPort 9051
+# Authentification par cookie : l'utilisateur tordash doit être dans le
+# groupe debian-tor pour lire le fichier de cookie.
+CookieAuthentication 1
+CookieAuthFileGroupReadable 1
+# (Alternative : HashedControlPassword 16:... et renseigner TOR_CONTROL_PASSWORD)
+
+## --- 2. Onion service du dashboard ----------------------------------------
+# Rend le dashboard joignable hors LAN via une adresse .onion, sans ouvrir
+# le moindre port sur Internet. Le port 80 du service onion est redirigé
+# vers le dashboard local (127.0.0.1:8080).
+HiddenServiceDir /var/lib/tor/dashboard/
+HiddenServicePort 80 127.0.0.1:8080
+# Restreint la version du protocole onion (v3, défaut).
+HiddenServiceVersion 3
+
+## --- 3. Exemple de configuration de relais (adapter à votre cas) ----------
+# Nickname MonRelais
+# ContactInfo admin@example.com
+# ORPort 9001
+# RelayBandwidthRate 10 MBytes
+# RelayBandwidthBurst 20 MBytes
+# ExitRelay 0
+# Après tout changement : page « Contrôle » → Recharger / Redémarrer.

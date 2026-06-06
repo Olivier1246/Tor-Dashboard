@@ -1,0 +1,8 @@
+# Configuration du helper privilégié — copier dans /etc/tor-dashboard/helper.conf
+# (root:root, mode 0644). Sourcé par tor-dashboard-helper.
+
+# Nom de l'unité systemd du relais (Debian : tor@default)
+SERVICE="tor@default"
+
+# Chemin du torrc piloté par le dashboard
+TORRC="/etc/tor/torrc"

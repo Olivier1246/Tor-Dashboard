@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Historique · Tor Relay{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Historique</h1>
+  <div class="range-tabs" id="rangeTabs">
+    {% for r in ranges %}
+    <button class="range-tab {{ 'active' if r == '24h' }}" data-range="{{ r }}">{{ r }}</button>
+    {% endfor %}
+  </div>
+</div>
+
+<section class="card">
+  <div class="chart-head">
+    <h2>Bande passante</h2>
+    <div class="legend">
+      <span class="leg"><i class="sw" style="background:#a368c4"></i>Descendant</span>
+      <span class="leg"><i class="sw" style="background:#3fb950"></i>Montant</span>
+    </div>
+  </div>
+  <canvas id="bwChart" height="260"></canvas>
+  <p class="muted chart-empty hidden" id="bwEmpty">
+    Pas encore de données sur cette période. L'historique se construit à mesure
+    que le dashboard tourne (échantillon toutes les {{ '%d'|format(60) }} s).
+  </p>
+</section>
+
+<section class="grid grid-2">
+  <div class="card">
+    <h2>Circuits</h2>
+    <canvas id="circChart" height="160"></canvas>
+  </div>
+  <div class="card">
+    <h2>Connexions OR</h2>
+    <canvas id="connChart" height="160"></canvas>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/chart.js"></script>
+<script src="/static/js/history.js"></script>
+{% endblock %}
