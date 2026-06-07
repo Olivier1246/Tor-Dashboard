@@ -21,6 +21,10 @@ CookieAuthFileGroupReadable 1
 # opening any port on the Internet. The onion service port 80 is forwarded to
 # the local dashboard (127.0.0.1:8080).
 HiddenServiceDir /var/lib/tor/dashboard/
+# Let the debian-tor group read the dir + hostname file, so the dashboard
+# (user tordash, member of debian-tor) can display its own .onion address.
+# Without this the dir stays 0700/debian-tor and the address shows "not published".
+HiddenServiceDirGroupReadable 1
 HiddenServicePort 80 127.0.0.1:8080
 # Pin the onion protocol version (v3, default).
 HiddenServiceVersion 3
