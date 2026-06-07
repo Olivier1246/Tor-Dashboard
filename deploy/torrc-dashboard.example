@@ -1,0 +1,21 @@
+# ===========================================================================
+# torrc for the SEPARATE dashboard Tor instance (tor@dashboard).
+# Installed by scripts/setup-dashboard-onion.sh at:
+#     /etc/tor/instances/dashboard/torrc
+#
+# This instance hosts ONLY the dashboard onion service — no relay — so the
+# relay (tor@default) no longer triggers the "relay + hidden service in the
+# same process" warning (tpo/core/tor/8742).
+# ===========================================================================
+
+# No SOCKS needed for a pure onion service.
+SocksPort 0
+
+# Dashboard onion service. DataDirectory is set by the tor@.service template
+# to /var/lib/tor-instances/dashboard, so the hidden service lives under it.
+HiddenServiceDir /var/lib/tor-instances/dashboard/dashboard_onion/
+# Group-readable so the dashboard user (tordash, added to the _tor-dashboard
+# group) can read the hostname file and display the .onion address.
+HiddenServiceDirGroupReadable 1
+HiddenServicePort 80 127.0.0.1:8080
+HiddenServiceVersion 3

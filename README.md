@@ -133,6 +133,21 @@ manage.py list             # list accounts
 manage.py delete  <name>   # delete an account
 ```
 
+## Hardening: dedicated onion instance (recommended for relays)
+
+Running a relay **and** a hidden service in the same Tor process triggers a
+security warning (tpo/core/tor/8742). To split them, host the dashboard onion
+in its own Tor instance (`tor@dashboard`, running as `_tor-dashboard`):
+
+```bash
+sudo ./scripts/setup-dashboard-onion.sh
+```
+
+The script creates the instance, migrates the existing keys (your `.onion`
+stays the same), comments out the `HiddenService*` lines in the relay torrc,
+wires the permissions and restarts everything. See
+[`deploy/torrc-dashboard.example`](deploy/torrc-dashboard.example).
+
 ## License
 
 Distributed under the **MIT** license — see [LICENSE](LICENSE). Provided as is,

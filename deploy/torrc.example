@@ -20,6 +20,14 @@ CookieAuthFileGroupReadable 1
 # Makes the dashboard reachable outside the LAN via a .onion address, without
 # opening any port on the Internet. The onion service port 80 is forwarded to
 # the local dashboard (127.0.0.1:8080).
+#
+# RECOMMENDED for a relay: do NOT put the onion service here. Running a relay
+# and a hidden service in the same Tor process triggers a security warning
+# (tpo/core/tor/8742). Instead run it in a dedicated instance:
+#     sudo ./scripts/setup-dashboard-onion.sh
+# which moves the lines below into tor@dashboard (see torrc-dashboard.example).
+#
+# SIMPLE option (no relay, or you accept the warning): keep the lines below.
 HiddenServiceDir /var/lib/tor/dashboard/
 # Let the debian-tor group read the dir + hostname file, so the dashboard
 # (user tordash, member of debian-tor) can display its own .onion address.
