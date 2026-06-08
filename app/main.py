@@ -22,6 +22,7 @@ from .auth import (
 )
 from .config import settings
 from .history import history
+from .security import get_dos_stats
 from .system_control import HelperError, save_torrc, service_action, service_status
 from .torrc_manager import QUICK_KEYS, parse_quick_values, read_torrc
 from .tor_controller import tor
@@ -233,6 +234,15 @@ async def api_connections(request: Request):
     require_auth(request)
     data = await asyncio.to_thread(tor.connections_by_country)
     return JSONResponse(data)
+
+
+@app.get("/api/security")
+async def api_security(request: Request):
+    require_auth(request)
+    info = await asyncio.to_thread(tor.security_info)
+    if info.get("online"):
+        info["dos"] = await asyncio.to_thread(get_dos_stats)
+    return JSONResponse(info)
 
 
 @app.get("/api/status")

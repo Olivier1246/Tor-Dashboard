@@ -161,5 +161,61 @@ async function tick() {
   renderAccounting(m.accounting);
 }
 
+// ---- Security panel (polled less often) ----------------------------------
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function renderSecurity(s) {
+  const vEl = document.getElementById("secVersion");
+  const rEl = document.getElementById("secReach");
+  const box = document.getElementById("dosStats");
+  if (!vEl) return;
+
+  if (!s || !s.online) {
+    vEl.textContent = "—";
+    rEl.textContent = "—";
+    box.innerHTML = '<p class="muted">Relay offline.</p>';
+    return;
+  }
+
+  const vs = s.version_status;
+  const okVer = vs === "recommended" || vs === "new";
+  vEl.innerHTML = vs
+    ? `<span class="badge ${okVer ? "ok" : "warn"}">${okVer ? "up to date" : vs}</span>`
+    : "—";
+
+  rEl.innerHTML = s.or_reachable == null
+    ? "—"
+    : (s.or_reachable
+        ? '<span class="badge ok">yes</span>'
+        : '<span class="badge warn">no</span>');
+
+  const dos = s.dos || {};
+  if (!dos.available) {
+    box.innerHTML = '<p class="muted">DoS stats unavailable — grant the dashboard '
+      + 'access to the Tor journal (systemd-journal group).</p>';
+    return;
+  }
+  const entries = Object.entries(dos.dos || {});
+  if (!entries.length) {
+    box.innerHTML = '<p class="muted">No heartbeat recorded yet '
+      + '(the first one can take up to the HeartbeatPeriod).</p>';
+    return;
+  }
+  box.innerHTML = '<dl class="kv">' + entries.map(([k, v]) => {
+    const hit = v > 0 ? ' class="dos-hit"' : '';
+    return `<dt>${cap(k)}</dt><dd${hit}>${v}</dd>`;
+  }).join("") + '</dl>';
+}
+
+async function tickSecurity() {
+  try {
+    const r = await fetch("/api/security", { credentials: "same-origin" });
+    if (r.status === 401) { location.href = "/login"; return; }
+    renderSecurity(await r.json());
+  } catch (e) { /* keep last values */ }
+}
+
 tick();
 setInterval(tick, POLL_MS);
+tickSecurity();
+setInterval(tickSecurity, 30000);

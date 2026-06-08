@@ -268,6 +268,31 @@ class TorController:
                 "countries": countries,
             }
 
+    # -- security info -------------------------------------------------------
+    def security_info(self) -> dict[str, Any]:
+        """Version recommendation status and ORPort reachability (control port)."""
+        with self._lock:
+            try:
+                c = self._get()
+            except Exception as exc:
+                return {"online": False, "error": str(exc)}
+            version_status = self._safe(
+                lambda: c.get_info("status/version/current")
+            )
+            reach = self._safe(
+                lambda: c.get_info("status/reachability-succeeded")
+            )
+            or_reachable = None
+            if reach:
+                for tok in reach.split():
+                    if tok.upper().startswith("OR="):
+                        or_reachable = tok.split("=", 1)[1] == "1"
+            return {
+                "online": True,
+                "version_status": version_status,
+                "or_reachable": or_reachable,
+            }
+
     # -- signals -------------------------------------------------------------
     def signal(self, sig: str) -> None:
         """Send a Tor signal (RELOAD, NEWNYM, ...) through the ControlPort."""

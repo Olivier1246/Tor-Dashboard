@@ -135,8 +135,28 @@ def fake_connections(max_relays=1500):
     }
 
 
+def fake_security():
+    return {"online": True, "version_status": "recommended", "or_reachable": True}
+
+
+def fake_dos():
+    return {
+        "available": True,
+        "dos": {
+            "circuits killed with too many cells": 0,
+            "circuits rejected": 0,
+            "marked addresses": 4,
+            "same address concurrent connections rejected": 12,
+            "connections rejected": 7,
+            "single hop clients refused": 0,
+            "INTRODUCE2 rejected": 0,
+        },
+    }
+
+
 tor_controller.tor.get_metrics = fake_metrics
 tor_controller.tor.connections_by_country = fake_connections
+tor_controller.tor.security_info = fake_security
 
 # main.py imported service_status/service_action into its namespace
 import app.main as main  # noqa: E402
@@ -144,6 +164,8 @@ import app.main as main  # noqa: E402
 main.service_status = lambda: "active"
 main.tor.get_metrics = fake_metrics
 main.tor.connections_by_country = fake_connections
+main.tor.security_info = fake_security
+main.get_dos_stats = fake_dos
 
 _sample_torrc = (ROOT / "tools" / "sample_torrc").read_text(encoding="utf-8")
 main.read_torrc = lambda: _sample_torrc

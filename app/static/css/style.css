@@ -247,6 +247,15 @@ input:focus, textarea:focus { outline: none; border-color: var(--purple-bright);
   .cbar { display: none; }
 }
 
+/* ---------- Security panel ---------- */
+.badge {
+  display: inline-block; padding: .15rem .55rem; border-radius: 999px;
+  font-size: .78rem; font-weight: 600; border: 1px solid var(--border);
+}
+.badge.ok { background: #15321d; color: #c4f3cf; border-color: var(--green); }
+.badge.warn { background: #3a2f17; color: #f3dca0; border-color: var(--amber); }
+.dos-hit { color: var(--amber); font-weight: 700; }
+
 /* ---------- Accounting bar ---------- */
 .acct-bar {
   height: 12px; border-radius: 999px; background: #15101d;

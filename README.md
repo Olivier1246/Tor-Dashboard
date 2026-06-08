@@ -36,6 +36,9 @@ start / stop / restart it — all behind strong authentication and reachable
 - **Connections by country**: geographic breakdown of relay peers, resolved
   through the ControlPort (`orconn-status` → consensus → Tor's GeoIP database),
   with no access to system sockets.
+- **Security panel**: Tor version recommendation status, ORPort reachability,
+  and DoS-mitigation counters (circuits killed, connections rejected, marked
+  addresses…) parsed from the heartbeat in the journal.
 - **Configuration editing**: `torrc` editor with **`tor --verify-config`
   validation before writing** (an invalid file is rejected without overwriting
   anything) plus a view of the key directives.

@@ -67,6 +67,21 @@
   </div>
 </section>
 
+<section class="grid grid-2">
+  <div class="card">
+    <h2>Security</h2>
+    <dl class="kv">
+      <dt>Tor version</dt><dd id="secVersion">—</dd>
+      <dt>ORPort reachable</dt><dd id="secReach">—</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>DoS mitigation <span class="muted">(since startup)</span></h2>
+    <div id="dosStats"><p class="muted">Loading…</p></div>
+  </div>
+</section>
+
 <div class="alert alert-err hidden" id="offlineBanner">
   ⚠️ The Tor relay is not responding on the ControlPort. It may be stopped —
   see the <a href="/control">Control</a> page.

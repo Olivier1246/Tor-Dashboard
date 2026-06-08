@@ -21,6 +21,8 @@ id "$APP_USER" &>/dev/null || useradd --system --create-home \
   --home-dir "/home/$APP_USER" --shell /usr/sbin/nologin "$APP_USER"
 # Access to the ControlPort authentication cookie
 usermod -aG debian-tor "$APP_USER"
+# Read access to the Tor journal (DoS / heartbeat stats on the Security panel)
+usermod -aG systemd-journal "$APP_USER"
 
 echo "==> Copying the application into $APP_DIR"
 mkdir -p "$APP_DIR"
