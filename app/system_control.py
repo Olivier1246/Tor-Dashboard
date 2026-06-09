@@ -8,11 +8,15 @@ arbitrary command is ever executed as root.
 
 from __future__ import annotations
 
+import contextlib
+import os
+import signal
 import subprocess
 
 from .config import settings
 
 _VALID_ACTIONS = {"start", "stop", "restart", "reload", "status"}
+_TIMEOUT = 60
 
 
 class HelperError(RuntimeError):
@@ -20,17 +24,32 @@ class HelperError(RuntimeError):
 
 
 def _run(args: list[str], input_data: str | None = None) -> str:
-    proc = subprocess.run(
+    """Run the privileged helper, killing the whole process group on timeout.
+
+    Using a new session + killpg avoids the classic hang where a grandchild
+    (systemctl, runuser…) keeps the stdout pipe open after the direct child is
+    killed, which would otherwise block indefinitely.
+    """
+    proc = subprocess.Popen(
         ["sudo", "-n", settings.helper_path, *args],
-        input=input_data,
-        capture_output=True,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        timeout=60,
+        start_new_session=True,
     )
+    try:
+        out, err = proc.communicate(input=input_data, timeout=_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        with contextlib.suppress(Exception):
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        with contextlib.suppress(Exception):
+            proc.communicate(timeout=5)
+        raise HelperError("helper timed out") from None
     if proc.returncode != 0:
-        msg = (proc.stderr or proc.stdout or "").strip()
-        raise HelperError(msg or f"helper failed (code {proc.returncode})")
-    return proc.stdout.strip()
+        raise HelperError((err or out or "").strip()
+                          or f"helper failed (code {proc.returncode})")
+    return out.strip()
 
 
 def service_action(action: str) -> str:

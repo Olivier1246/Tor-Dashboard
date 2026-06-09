@@ -129,7 +129,7 @@ async def dashboard(request: Request):
 @app.get("/config", response_class=HTMLResponse)
 async def config_page(request: Request):
     require_auth(request)
-    content = read_torrc()
+    content = await asyncio.to_thread(read_torrc)
     return templates.TemplateResponse(
         "config.html",
         _ctx(
@@ -149,7 +149,7 @@ async def config_page(request: Request):
 async def config_save(request: Request, torrc: str = Form(...)):
     require_auth(request)
     try:
-        save_torrc(torrc)
+        await asyncio.to_thread(save_torrc, torrc)
         request.session["flash"] = (
             "Configuration validated and saved. "
             "Restart or reload Tor to apply it."
@@ -162,12 +162,13 @@ async def config_save(request: Request, torrc: str = Form(...)):
 @app.get("/control", response_class=HTMLResponse)
 async def control_page(request: Request):
     require_auth(request)
+    status = await asyncio.to_thread(service_status)
     return templates.TemplateResponse(
         "control.html",
         _ctx(
             request,
             page="control",
-            status=service_status(),
+            status=status,
             service=settings.tor_service,
             flash=request.session.pop("flash", None),
             flash_err=request.session.pop("flash_err", None),
@@ -188,10 +189,10 @@ async def control_action(request: Request, action: str):
         request.session["flash_err"] = "Unknown action."
         return RedirectResponse("/control", status_code=303)
     try:
-        service_action(action)
+        await asyncio.to_thread(service_action, action)
         request.session["flash"] = f"Tor relay {labels[action]} successfully."
         if action in ("stop", "restart"):
-            tor.close()  # invalidate the ControlPort connection
+            await asyncio.to_thread(tor.close)  # invalidate the ControlPort conn
     except HelperError as exc:
         request.session["flash_err"] = f"Action failed: {exc}"
     return RedirectResponse("/control", status_code=303)

@@ -8,6 +8,7 @@ from being displayed. If Tor is stopped, get_metrics() simply returns
 
 from __future__ import annotations
 
+import contextlib
 import threading
 import time
 from collections import Counter
@@ -15,6 +16,9 @@ from typing import Any
 
 import stem
 from stem.control import Controller
+
+_LOCK_TIMEOUT = 8     # seconds to wait for the controller lock
+_SOCKET_TIMEOUT = 30  # seconds before a stale control-socket read gives up
 
 from .config import settings
 from .countries import country_name, flag_emoji
@@ -31,8 +35,28 @@ class TorController:
         self._consensus_ts = 0.0
 
     # -- connection management ----------------------------------------------
+    @contextlib.contextmanager
+    def _locked(self):
+        """Acquire the controller lock with a timeout; yields True if acquired.
+
+        Prevents a single stuck control-port call from making every other
+        request pile up (which would freeze the whole dashboard).
+        """
+        got = self._lock.acquire(timeout=_LOCK_TIMEOUT)
+        try:
+            yield got
+        finally:
+            if got:
+                self._lock.release()
+
     def _connect(self) -> Controller:
         controller = Controller.from_port(port=settings.tor_control_port)
+        # Bound socket reads so a half-open connection (after a Tor restart)
+        # can never block a worker thread forever.
+        with contextlib.suppress(Exception):
+            raw = getattr(controller.get_socket(), "_socket", None)
+            if raw is not None:
+                raw.settimeout(_SOCKET_TIMEOUT)
         if settings.tor_control_password:
             controller.authenticate(password=settings.tor_control_password)
         else:
@@ -52,7 +76,7 @@ class TorController:
         return self._controller
 
     def close(self) -> None:
-        with self._lock:
+        with self._locked():
             if self._controller is not None:
                 try:
                     self._controller.close()
@@ -71,7 +95,9 @@ class TorController:
     # -- metrics -------------------------------------------------------------
     def get_metrics(self) -> dict[str, Any]:
         """Collect a snapshot of the relay metrics."""
-        with self._lock:
+        with self._locked() as ok:
+            if not ok:
+                return {"online": False, "error": "controller busy"}
             try:
                 c = self._get()
             except Exception as exc:
@@ -219,7 +245,9 @@ class TorController:
         ``orconn-status``, their IP is resolved from the consensus, then the
         country via ``GETINFO ip-to-country`` (Tor's GeoIP database).
         """
-        with self._lock:
+        with self._locked() as ok:
+            if not ok:
+                return {"online": False, "error": "controller busy"}
             try:
                 c = self._get()
             except Exception as exc:
@@ -271,7 +299,9 @@ class TorController:
     # -- security info -------------------------------------------------------
     def security_info(self) -> dict[str, Any]:
         """Version recommendation status and ORPort reachability (control port)."""
-        with self._lock:
+        with self._locked() as ok:
+            if not ok:
+                return {"online": False, "error": "controller busy"}
             try:
                 c = self._get()
             except Exception as exc:
@@ -296,7 +326,9 @@ class TorController:
     # -- signals -------------------------------------------------------------
     def signal(self, sig: str) -> None:
         """Send a Tor signal (RELOAD, NEWNYM, ...) through the ControlPort."""
-        with self._lock:
+        with self._locked() as ok:
+            if not ok:
+                raise TimeoutError("controller busy")
             c = self._get()
             c.signal(getattr(stem.Signal, sig))
 
