@@ -17,7 +17,7 @@ SupplementaryGroups=debian-tor systemd-journal
 WorkingDirectory=/opt/tor-dashboard
 EnvironmentFile=/opt/tor-dashboard/.env
 ExecStart=/opt/tor-dashboard/.venv/bin/uvicorn app.main:app \
-          --host 127.0.0.1 --port 8080 --proxy-headers
+          --host 127.0.0.1 --port 8080 --proxy-headers --no-access-log
 Restart=on-failure
 RestartSec=3
 
